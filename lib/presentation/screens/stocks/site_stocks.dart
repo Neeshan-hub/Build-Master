@@ -165,8 +165,7 @@ class _SiteStocksState extends State<SiteStocks> {
                             TextButton(
                               style: ElevatedButton.styleFrom(
                                 elevation: 0,
-                                fixedSize: Size(size.width / 90 * 8.66,
-                                    size.height / 90 * 5.86),
+
                                 foregroundColor: AppColors.blue,
                               ),
                               onPressed: () {
@@ -216,7 +215,7 @@ class _SiteStocksState extends State<SiteStocks> {
                                   onPressed: () {
                                     if (_formKey.currentState!.validate()) {
                                       StockModel stockModel = StockModel(
-                                        itemname: _itemname.text,
+                                        itemname: _itemname.text.toLowerCase(),
                                         brandname: _brandname.text,
                                         suppliername: _suppliername.text,
                                         quantity: double.parse(_quantity.text),
@@ -885,10 +884,11 @@ class _SiteStocksState extends State<SiteStocks> {
                                 color: AppColors.white,
                                 horizontalMargin: padding.top * 0.4,
                                 verticalMargin: padding.top * 0.2,
-                                child: StockSearchBar(
+                                child:// In the build method of _SiteStocksState, update the StockSearchBar widget:
+                                StockSearchBar(
                                   siteId: args['sid'],
-                                  focusNode:
-                                      searchFocusNode, // Pass focus node to StockSearchBar
+                                  focusNode: searchFocusNode,
+                                  onStockSelected: showEditSiteModal, // Pass the edit dialog function as callback
                                 ),
                               ).customBox(),
                             ),

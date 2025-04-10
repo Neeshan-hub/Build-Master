@@ -27,6 +27,21 @@ class SitePage extends StatefulWidget {
   State<SitePage> createState() => _SitePageState();
 }
 
+Future<void> migrateStocks(String siteId) async {
+  final stocksSnapshot = await FirebaseFirestore.instance
+      .collection("sites")
+      .doc(siteId)
+      .collection("stocks")
+      .get();
+
+  for (var doc in stocksSnapshot.docs) {
+    final itemname = doc['itemname'] as String;
+    await doc.reference.update({
+      "itemname": itemname.toLowerCase(),
+    });
+  }
+}
+
 class _SitePageState extends State<SitePage> {
   List<String> imageurl = [];
 
@@ -133,6 +148,7 @@ class _SitePageState extends State<SitePage> {
                     itemCount: snapshot.data!.docs.length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
+                      print(snapshot.data!.docs[index]['sid']);
                       return InkWell(
                         onTap: () {
                           Navigator.of(context).pushNamed(siteDesc, arguments: {

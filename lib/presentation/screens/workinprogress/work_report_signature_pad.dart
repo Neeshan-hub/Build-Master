@@ -94,6 +94,12 @@ class _WorkReportSignaturePadPageState
   }
 
   Future onGeneratePdf(Size size, args) async {
+    print('generating file initiated');
+    print(size);
+    print(args);
+    print(args['name']);
+    print(args['data']);
+    print(args['count']);
     showDialog(
       context: context,
       builder: (context) => customLoading(size),

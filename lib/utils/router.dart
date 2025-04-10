@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 
 import '../presentation/screens/auth/login.dart';
 import '../presentation/screens/orders/site_order.dart';
+import '../presentation/screens/workinprogress/subtasks_page.dart';
 
 class AppRouter {
   Route? onGenerateRoute(RouteSettings settings) {
@@ -90,6 +91,11 @@ class AppRouter {
       case workimagepage:
         return MaterialPageRoute(
             builder: (context) => const WorkImagesPage(), settings: settings);
+      case subtasksPage:
+        return MaterialPageRoute(
+          builder: (context) => const SubtasksPage(),
+          settings: settings,
+        );
       case workInvoiceSignaturePadPage:
         return MaterialPageRoute(
             builder: (context) => const WorkReportSignaturePadPage(),

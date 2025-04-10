@@ -26,3 +26,4 @@ const String orderinvoicepdf = "orderinvoicepdf";
 const String stockSignaturePadPage = "stockSignaturePadPage";
 const String workInvoiceSignaturePadPage = "workInvoiceSignaturePadPage";
 const String workimagepage = "workimagepage";
+const String subtasksPage = 'subtasks_page';

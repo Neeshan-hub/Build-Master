@@ -683,10 +683,24 @@ class _WorkInProgressPageState extends State<WorkInProgressPage> {
                         children: [
                           InkWell(
                             onTap: () {
-                              showProgressModal(
-                                snapshot.data!.docs[index]['wid'],
-                                snapshot.data!.docs[index]['sid'],
+                              //TODO:: navigate to showing list
+
+                              Navigator.of(context).pushNamed(
+                                subtasksPage,
+                                arguments: {
+                                  "sid": snapshot.data!.docs[index]['sid'],
+                                  "wid": snapshot.data!.docs[index]['wid'],
+                                  "title": snapshot.data!.docs[index]['title'],
+                                  "startdate": snapshot.data!.docs[index]['startdate'].toDate(),
+                                  "endDate": snapshot.data!.docs[index]['endDate'].toDate(),
+                                  "workdesc": snapshot.data!.docs[index]['workdesc'],
+                                  "progress": snapshot.data!.docs[index]['progress'],
+                                },
                               );
+                              // showProgressModal(
+                              //   snapshot.data!.docs[index]['wid'],
+                              //   snapshot.data!.docs[index]['sid'],
+                              // );
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -828,7 +842,7 @@ class _WorkInProgressPageState extends State<WorkInProgressPage> {
                               arguments: {
                                 "data": data,
                                 "name": "WorkReport - ${data[0]['sitename']}",
-                                "count": 3,
+                                "count": 5,
                               });
                         }
                       },
