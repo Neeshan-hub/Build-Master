@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "99173771493",
+    "project_id": "buildmasterv12025",
+    "storage_bucket": "buildmasterv12025.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:99173771493:android:de4e8634eb014148fb8c0c",
+        "android_client_info": {
+          "package_name": "com.fyp.construction"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwdh8_5mwjM9NWGIS-TVenmJxWTXFkmpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
