@@ -365,7 +365,7 @@ class _WorkInProgressPageState extends State<WorkInProgressPage> {
                                             SizedBox(
                                               width: size.width / 90 * 20,
                                               child: Text(
-                                                "${item['unit']}",
+                                                "${item['quantity']}",
                                                 style: TextStyle(
                                                   color: AppColors.blue,
                                                   fontSize: 14,
@@ -497,6 +497,8 @@ class _WorkInProgressPageState extends State<WorkInProgressPage> {
                                                     double.parse(stocks.text),
                                                     dropdownvalue,
                                                   );
+                                                  stocks.text="";
+
                                                 }
                                               }
                                             }

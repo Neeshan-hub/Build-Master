@@ -103,8 +103,12 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         "suppliername": orderModel.suppliername,
         "unit": orderModel.unit,
         "quantity": orderModel.quantity,
+
         "status": "On The Way",
         "rate": orderModel.rate,
+      });
+      await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+        "lastActivity": FieldValue.serverTimestamp(),
       });
       add(CompletedAddingSiteOrderEvent());
     } on FirebaseException catch (e) {
@@ -139,6 +143,9 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         await orderdoc.update({
           "quantity": qty,
         });
+        await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+          "lastActivity": FieldValue.serverTimestamp(),
+        });
         add(CompleteUpdatingOrderQuantityEvent());
       }
     } on FirebaseException catch (e) {
@@ -167,6 +174,9 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           .doc(oid);
       await orderdoc.update({
         "quantity": qty,
+      });
+      await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+        "lastActivity": FieldValue.serverTimestamp(),
       });
       add(CompleteUpdatingQuantityEvent());
     } on FirebaseException catch (e) {
@@ -221,6 +231,9 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           "unit": unit,
         });
       }
+      await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+        "lastActivity": FieldValue.serverTimestamp(),
+      });
 
       add(CompleteUpdatingSiteOrderEvent());
     } on FirebaseException catch (e) {

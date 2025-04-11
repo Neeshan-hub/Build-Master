@@ -22,9 +22,12 @@ class HorizontalSiteList extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 300,
-      width: double.infinity, // Expands the horizontal space
+      width: double.infinity,
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection("sites").snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection("sites")
+            .orderBy('lastActivity', descending: true) // Sort by last activity
+            .snapshots(),
         builder: (context, siteSnapshot) {
           if (siteSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -45,19 +48,17 @@ class HorizontalSiteList extends StatelessWidget {
             itemCount: sites.length,
             itemBuilder: (context, index) {
               final siteData = sites[index].data() as Map<String, dynamic>;
+              final String siteId = sites[index].id;
               final String siteName = siteData['sitename'] ?? 'Unknown Site';
 
               return SizedBox(
-                width: 300, // Increases the width of each site card
+                width: 300,
                 child: Card(
                   margin: const EdgeInsets.all(8.0),
-                  elevation: 12, // Increased elevation for deeper shadow
-                  shadowColor:
-                      // ignore: deprecated_member_use
-                      Colors.black.withOpacity(0.4), // Darker shadow color
+                  elevation: 12,
+                  shadowColor: Colors.black.withOpacity(0.4),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        12.0), // Rounded corners for the card
+                    borderRadius: BorderRadius.circular(12.0),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -72,12 +73,14 @@ class HorizontalSiteList extends StatelessWidget {
                           ),
                         ),
                         Expanded(
-                          child: StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
+                          child: FutureBuilder<QuerySnapshot>(
+                            future: FirebaseFirestore.instance
                                 .collection("sites")
-                                .doc(sites[index].id)
+                                .doc(siteId)
                                 .collection("stocks")
-                                .snapshots(),
+                                .orderBy('lastUpdated', descending: true)
+                                .limit(5) // Limit to avoid fetching too much
+                                .get(),
                             builder: (context, stockSnapshot) {
                               if (stockSnapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -100,37 +103,33 @@ class HorizontalSiteList extends StatelessWidget {
 
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ...stocks.map((stock) {
-                                    final stockData =
-                                        stock.data() as Map<String, dynamic>;
-                                    final String itemName =
-                                        stockData['itemname'] ?? 'Unknown Item';
-                                    final String quantity =
-                                        stockData['quantity']?.toString() ?? '';
+                                children: stocks.map((stock) {
+                                  final stockData =
+                                  stock.data() as Map<String, dynamic>;
+                                  final String itemName =
+                                      stockData['itemname'] ?? 'Unknown Item';
+                                  final String quantity =
+                                      stockData['quantity']?.toString() ?? '';
 
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 4.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            itemName,
-                                            style:
-                                                const TextStyle(fontSize: 15),
-                                          ),
-                                          Text(
-                                            quantity,
-                                            style:
-                                                const TextStyle(fontSize: 16),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
-                                ],
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 4.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          itemName,
+                                          style: const TextStyle(fontSize: 15),
+                                        ),
+                                        Text(
+                                          quantity,
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
                               );
                             },
                           ),
@@ -159,15 +158,14 @@ class HorizontalSiteList extends StatelessWidget {
                                       "clientname": siteData['clientname'],
                                       "phone": siteData['phone'],
                                       "supervisor": siteData['supervisor'],
-                                      "role":
-                                          role, // Role fetched from FirebaseAuth
+                                      "role": role,
                                     },
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                 ),
-                                child: Text(
+                                child: const Text(
                                   "Total Items",
                                   style: TextStyle(
                                     color: Colors.black,

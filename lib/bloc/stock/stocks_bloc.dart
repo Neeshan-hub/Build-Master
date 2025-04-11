@@ -86,7 +86,7 @@ class StocksBloc extends Bloc<StocksEvent, StocksState> {
     );
   }
 
-  addStock(StockModel stockModel, String sid) async {
+  void addStock(StockModel stockModel, String sid) async {
     try {
       add(AddingSiteStockEvent());
       CollectionReference sitestock = FirebaseFirestore.instance
@@ -103,10 +103,19 @@ class StocksBloc extends Bloc<StocksEvent, StocksState> {
         "unit": stockModel.unit,
         "quantity": stockModel.quantity,
         "rate": stockModel.rate,
+        "lastUpdated": FieldValue.serverTimestamp(), // Add timestamp for stock
       });
+
+      // Update the site's lastActivity field
+      await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+        "lastActivity": FieldValue.serverTimestamp(),
+      });
+
       add(CompletedAddingSiteStockEvent());
     } on FirebaseException catch (e) {
       add(FailedSiteStockEvent(error: e.message!));
+    } catch (e) {
+      add(FailedSiteStockEvent(error: e.toString()));
     }
   }
 
@@ -135,7 +144,11 @@ class StocksBloc extends Bloc<StocksEvent, StocksState> {
             .collection("stocks")
             .doc(skid);
         await workDoc.update({
+          "lastUpdated": FieldValue.serverTimestamp(), // Add timestamp for stock
           "quantity": qty,
+        });
+        await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+          "lastActivity": FieldValue.serverTimestamp(),
         });
         add(CompleteUpdatingStockQuantityEvent());
       }
@@ -164,7 +177,12 @@ class StocksBloc extends Bloc<StocksEvent, StocksState> {
           .collection("stocks")
           .doc(skid);
       await workDoc.update({
+        "lastUpdated": FieldValue.serverTimestamp(), // Add timestamp for stock
+
         "quantity": qty,
+      });
+      await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+        "lastActivity": FieldValue.serverTimestamp(),
       });
       add(CompleteUpdatingQuantityEvent());
     } on FirebaseException catch (e) {
@@ -186,8 +204,13 @@ class StocksBloc extends Bloc<StocksEvent, StocksState> {
         "brandname": itembrand,
         "suppliername": suppliername,
         "quantity": quantity,
+        "lastUpdated": FieldValue.serverTimestamp(), // Add timestamp for stock
+
         "rate": rate,
         "unit": unit,
+      });
+      await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+        "lastActivity": FieldValue.serverTimestamp(),
       });
       add(CompleteUpdatingSiteStockEvent());
     } on FirebaseException catch (e) {

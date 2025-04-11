@@ -76,8 +76,12 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "clientname": siteModel.clientname,
         "phone": siteModel.phone,
         "supervisor": siteModel.supervisor,
-      });
+        "lastActivity": FieldValue.serverTimestamp(),
 
+      });
+      // await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+      //   "lastActivity": FieldValue.serverTimestamp(),
+      // });
       for (int i = 0; i < images.length; i++) {
         var url = uploadFile(images[i]);
         imageUrls.add(url.toString());
@@ -109,6 +113,9 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "sid": id,
         "image": await reference.getDownloadURL(),
       });
+    });
+    await FirebaseFirestore.instance.collection("sites").doc(id).update({
+      "lastActivity": FieldValue.serverTimestamp(),
     });
     return await reference.getDownloadURL();
   }
@@ -174,6 +181,9 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "clientname": clientname,
         "phone": phone,
         "sitedesc": sitedesc,
+        // await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+           "lastActivity": FieldValue.serverTimestamp(),
+        // });
       });
 
       if (supervisor.isNotEmpty) {
