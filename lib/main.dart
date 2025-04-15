@@ -19,6 +19,7 @@ import 'package:construction/utils/router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'bloc/workinprogress/workinprogress_bloc.dart';
 import 'firebase_options.dart';
@@ -26,6 +27,10 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LocalNotificationService().initialize();
+  await Supabase.initialize(
+    url: 'https://lskkhschidhabbdcgndz.supabase.co', // From Step 1.3
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxza2toc2NoaWRoYWJiZGNnbmR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDI4NTQsImV4cCI6MjA2MDMxODg1NH0.H91J5IDmjkfjjwwJq5QutazPDgk7Hy9nIqOuduIBAM0', // From Step 1.3
+  );
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

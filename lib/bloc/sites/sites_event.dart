@@ -1,6 +1,5 @@
 part of 'sites_bloc.dart';
 
-@immutable
 abstract class SitesEvent {}
 
 class FailedSiteEvent extends SitesEvent {
@@ -8,24 +7,35 @@ class FailedSiteEvent extends SitesEvent {
   FailedSiteEvent({this.error});
 }
 
-class AddedSiteEvent extends SitesEvent {
-  final String? message;
-  AddedSiteEvent({this.message});
-}
+class LoadingSiteEvent extends SitesEvent {}
+
+class LoadingCompleteEvent extends SitesEvent {}
 
 class CompletedSiteEvent extends SitesEvent {
   final List<dynamic>? sites;
   CompletedSiteEvent({this.sites});
 }
 
-class LoadingSiteEvent extends SitesEvent {}
-
-class LoadingCompleteEvent extends SitesEvent {}
-
-class FailedDeleteSiteEvent extends SitesEvent {
-  final String? error;
-  FailedDeleteSiteEvent({this.error});
+class AddedSiteEvent extends SitesEvent {
+  final String? message;
+  AddedSiteEvent({this.message});
 }
+
+class SiteDataEvent extends SitesEvent {
+  final Map<String, dynamic>? siteData; // Changed from List<dynamic>?
+  SiteDataEvent({this.siteData});
+}
+
+class SiteImagesEvent extends SitesEvent {
+  final List<dynamic>? siteImages;
+  SiteImagesEvent({this.siteImages});
+}
+
+class LoadingDeleteCompleteEvent extends SitesEvent {}
+
+class LoadingDeleteSiteEvent extends SitesEvent {}
+
+class FailedDeleteSiteEvent extends SitesEvent {}
 
 class UpdatingSiteEvent extends SitesEvent {}
 
@@ -36,16 +46,8 @@ class FailedUpdatingSiteEvent extends SitesEvent {
   FailedUpdatingSiteEvent({this.error});
 }
 
-class LoadingDeleteSiteEvent extends SitesEvent {}
-
-class LoadingDeleteCompleteEvent extends SitesEvent {}
-
-class SiteDataEvent extends SitesEvent {
-  final Map<String, dynamic>? siteData;
-  SiteDataEvent({this.siteData});
-}
-
-class SiteImagesEvent extends SitesEvent {
-  final List<dynamic>? siteImages;
-  SiteImagesEvent({this.siteImages});
+class AddSiteEvent extends SitesEvent {
+  final SiteModel siteModel;
+  final List<XFile> images;
+  AddSiteEvent(this.siteModel, this.images);
 }

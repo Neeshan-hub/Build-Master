@@ -6,6 +6,7 @@ class SiteModel {
   String? clientname;
   String? phone;
   String? supervisor;
+  final List<String> imageUrls;
 
   SiteModel({
     this.sid,
@@ -15,6 +16,7 @@ class SiteModel {
     this.clientname,
     this.phone,
     this.supervisor,
+  this.imageUrls = const [],
   });
 
   factory SiteModel.fromDocument(Map<String, dynamic> doc) {
@@ -26,6 +28,8 @@ class SiteModel {
       clientname: doc['clientname'] ?? "",
       phone: doc['phone'] ?? "",
       supervisor: doc['supervisor'] ?? "",
+      imageUrls: doc['imageUrls'] ?? "",
+
     );
   }
 }

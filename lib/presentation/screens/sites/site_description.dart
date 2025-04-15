@@ -6,12 +6,10 @@ import 'package:construction/presentation/includes/appbar.dart';
 import 'package:construction/services/local_notifications.dart';
 import 'package:construction/utils/app_colors.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/fluent_mdl2.dart';
-
 import 'package:iconify_flutter/icons/zondicons.dart';
 
 import '../../../bloc/dropdown/dropdown_bloc.dart';
@@ -37,6 +35,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
   String clientname = "";
   String phone = "";
   String about = "";
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -526,7 +525,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                         phone = snapshot.data!['phone'];
                         about = snapshot.data!['sitedesc'];
                         return Container(
-                          height: size.height / 90 * 55,
+                          height: MediaQuery.of(context).size.height,
                           padding: EdgeInsets.symmetric(
                               horizontal: padding.top * 0.8),
                           child: ListView(
@@ -818,9 +817,8 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                   ],
                                 ),
                               ),
-                              SizedBox(
-                                height: size.height / 90 * 1.3,
-                              ),
+                              buildImageList(snapshot),
+
                             ],
                           ),
                         );
@@ -847,4 +845,68 @@ class _SiteDescriptionState extends State<SiteDescription> {
       ),
     );
   }
+
+
+  Widget buildImageList(AsyncSnapshot snapshot) {
+    final imageUrls = snapshot.data!['imageUrls'] as List?;
+
+    if (imageUrls == null || imageUrls.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 1, // Square images
+      ),
+      itemCount: imageUrls.length,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => Dialog(
+                backgroundColor: Colors.transparent,
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Image.network(
+                        imageUrls[index],
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.error, size: 50),
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: IconButton(
+                        icon: const Icon(Icons.close,
+                            color: Colors.white, size: 30),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.network(
+              imageUrls[index],
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+              const Icon(Icons.error),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 }

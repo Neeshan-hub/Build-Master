@@ -63,7 +63,7 @@ class _WorkImagesPageState extends State<WorkImagesPage> {
                 workimages = await picker.pickMultiImage();
                 images.clear();
 
-                siteimageBloc.pickImage(workimages);
+                siteimageBloc.pickImage();
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

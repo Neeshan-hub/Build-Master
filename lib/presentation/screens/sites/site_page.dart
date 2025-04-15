@@ -1,23 +1,17 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:construction/presentation/includes/appbar.dart';
-
 import 'package:construction/presentation/includes/custom_box.dart';
-
 import 'package:construction/presentation/includes/show_modal.dart';
 import 'package:construction/utils/routes.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-
 import 'package:iconify_flutter/icons/zondicons.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../utils/app_colors.dart';
-
 import '../../../bloc/sites/sites_bloc.dart';
-
 import '../../../main.dart';
 
 class SitePage extends StatefulWidget {
@@ -48,6 +42,7 @@ class _SitePageState extends State<SitePage> {
   List<String> images = [];
 
   List<XFile> siteimages = [];
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -97,7 +92,10 @@ class _SitePageState extends State<SitePage> {
       ),
       backgroundColor: AppColors.white,
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance.collection("sites").snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection("sites")
+            .orderBy("lastActivity", descending: true)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return snapshot.data!.docs.isEmpty
@@ -267,16 +265,16 @@ class _SitePageState extends State<SitePage> {
                                                     },
                                                   );
                                                 }
-                                                if (state
-                                                    is LoadingDeleteCompleteState) {
-                                                  BotToast.closeAllLoading();
-                                                  BotToast.showText(
-                                                    text:
-                                                        " Delete ${snapshot.data!.docs[index]['sitename']} Site",
-                                                    contentColor: Colors.green,
-                                                  );
-                                                  Navigator.of(context).pop();
-                                                }
+                                                // if (state
+                                                //     is LoadingDeleteCompleteState) {
+                                                //   BotToast.closeAllLoading();
+                                                //   BotToast.showText(
+                                                //     text:
+                                                //         " Delete ${snapshot.data!.docs[index]['sitename']} Site",
+                                                //     contentColor: Colors.green,
+                                                //   );
+                                                //   Navigator.of(context).pop();
+                                                // }
                                                 if (state
                                                     is FailedDeleteSiteState) {}
                                               },

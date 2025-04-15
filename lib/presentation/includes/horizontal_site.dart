@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../utils/app_colors.dart';
+
 class HorizontalSiteList extends StatelessWidget {
   const HorizontalSiteList({super.key});
 
@@ -144,8 +146,8 @@ class HorizontalSiteList extends StatelessWidget {
                             }
                             final role = roleSnapshot.data ?? 'Unknown';
 
-                            return Align(
-                              alignment: Alignment.bottomRight,
+                            return SizedBox(
+                              width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.of(context).pushNamed(
@@ -163,17 +165,24 @@ class HorizontalSiteList extends StatelessWidget {
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: AppColors.blue,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(12),
+                                      bottomRight: Radius.circular(12),
+                                    ),
+                                  ),
                                 ),
                                 child: const Text(
-                                  "Total Items",
+                                  "Visit Site",
                                   style: TextStyle(
-                                    color: Colors.black,
+                                    color: Colors.white,
                                     fontSize: 15,
                                   ),
                                 ),
                               ),
                             );
+
                           },
                         ),
                       ],

@@ -3,16 +3,17 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/sites.dart';
 import '../../data/models/stocks.dart';
 import '../../main.dart';
 
 part 'sites_event.dart';
+
 part 'sites_state.dart';
 
 class SitesBloc extends Bloc<SitesEvent, SitesState> {
@@ -59,37 +60,50 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     on<FailedUpdatingSiteEvent>(
       (event, emit) => emit(FailedUpdatingSiteState()),
     );
+    on<AddSiteEvent>(addSite);
   }
 
   CollectionReference sites = FirebaseFirestore.instance.collection("sites");
   String id = "";
-  Future<void> addSite(SiteModel siteModel, List<XFile> images) async {
-    add(LoadingSiteEvent());
-    List<dynamic> imageUrls = [];
-    id = sites.doc().id;
+
+  Future<void> addSite(AddSiteEvent event, Emitter<SitesState> emit) async {
+    emit(LoadingSiteState());
+    List<String> imageUrls = [];
+    String id = sites.doc().id;
+    print("55");
+
     try {
+      // Upload images to Firebase Storage and collect URLs
+      for (var image in event.images) {
+        print('image came in');
+        String? url = await _uploadSupaFile(image, id);
+
+        if (url != null) {
+          print('image not null re');
+          print(url);
+
+          imageUrls.add(url);
+        }
+        print('image null re');
+      }
+      // Store site data along with image URLs in Firestore
       await sites.doc(id).set({
         "sid": id,
-        "sitename": siteModel.sitename,
-        "sitedesc": siteModel.sitedesc,
-        "sitelocation": siteModel.sitelocation,
-        "clientname": siteModel.clientname,
-        "phone": siteModel.phone,
-        "supervisor": siteModel.supervisor,
+        "sitename": event.siteModel.sitename,
+        "sitedesc": event.siteModel.sitedesc,
+        "sitelocation": event.siteModel.sitelocation,
+        "clientname": event.siteModel.clientname,
+        "phone": event.siteModel.phone,
+        "supervisor": event.siteModel.supervisor,
+        "imageUrls": imageUrls,
         "lastActivity": FieldValue.serverTimestamp(),
-
       });
-      // await FirebaseFirestore.instance.collection("sites").doc(sid).update({
-      //   "lastActivity": FieldValue.serverTimestamp(),
-      // });
-      for (int i = 0; i < images.length; i++) {
-        var url = uploadFile(images[i]);
-        imageUrls.add(url.toString());
-      }
-
       add(CompletedSiteEvent());
+      add(AddedSiteEvent(message: "Site added successfully"));
     } on FirebaseException catch (e) {
-      add(FailedSiteEvent(error: e.message));
+      add(FailedSiteEvent(error: e.message ?? "Failed to add site"));
+    } catch (e) {
+      add(FailedSiteEvent(error: e.toString()));
     }
   }
 
@@ -104,20 +118,106 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     }
   }
 
-  uploadFile(XFile image) async {
-    Reference reference =
-        FirebaseStorage.instance.ref().child("siteimages").child(image.name);
-    UploadTask uploadTask = reference.putFile(File(image.path));
-    await uploadTask.whenComplete(() async {
-      sites.doc(id).collection("siteimages").add({
-        "sid": id,
-        "image": await reference.getDownloadURL(),
-      });
-    });
-    await FirebaseFirestore.instance.collection("sites").doc(id).update({
-      "lastActivity": FieldValue.serverTimestamp(),
-    });
-    return await reference.getDownloadURL();
+  Future<String?> _uploadFile(XFile image, String siteId) async {
+    try {
+      print('image 1 re');
+
+      File file = File(image.path);
+      if (!file.existsSync()) {
+        print('image 2 re');
+
+        return null;
+      }
+      print('image 3 re');
+
+      String sanitizedName = image.name
+          .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
+          .replaceAll(' ', '_');
+
+      Reference reference = FirebaseStorage.instance
+          .ref()
+          .child("siteimages")
+          .child(siteId)
+          .child("${DateTime.now().millisecondsSinceEpoch}_$sanitizedName");
+      print('image 4 re');
+
+      UploadTask uploadTask = reference.putFile(file);
+      TaskSnapshot snapshot = await uploadTask;
+      print('image 6 re');
+
+      if (snapshot.state == TaskState.success) {
+        return await reference.getDownloadURL();
+      }
+      return null;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<String?> _uploadSupaFile(XFile image, String siteId) async {
+    try {
+      print('image 1 re');
+
+      File file = File(image.path);
+      if (!file.existsSync()) {
+        print('image 2 re');
+        return null;
+      }
+      print('image 3 re');
+
+      String sanitizedName = image.name
+          .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
+          .replaceAll(' ', '_');
+
+// Create unique filename with timestamp and siteId
+      String fileName =
+          "${DateTime.now().millisecondsSinceEpoch}_$siteId$sanitizedName";
+      print('image 4 re');
+
+// Upload to Supabase Storage
+      final supabase = Supabase.instance.client;
+      await supabase.storage.from('sites').upload(fileName, file);
+      print('image 6 re');
+
+// Return public URL
+      return supabase.storage.from('sites').getPublicUrl(fileName);
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<String?> uploadFile(XFile image, String siteId) async {
+    try {
+      // Sanitize image name to avoid invalid characters
+      String sanitizedName = image.name
+          .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
+          .replaceAll(' ', '_');
+
+      // Use siteId to ensure unique path
+      Reference reference = FirebaseStorage.instance
+          .ref()
+          .child("siteimages")
+          .child(siteId)
+          .child("${DateTime.now().millisecondsSinceEpoch}_$sanitizedName");
+
+      // Upload the file
+      UploadTask uploadTask = reference.putFile(File(image.path));
+
+      // Wait for upload completion and check state
+      TaskSnapshot snapshot = await uploadTask;
+      if (snapshot.state == TaskState.success) {
+        String downloadUrl = await reference.getDownloadURL();
+        return downloadUrl;
+      } else {
+        print("Upload failed with state: ${snapshot.state}");
+        return null;
+      }
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
   }
 
   Future<void> deleteSite(String sid, List<String> imageurl, context) async {
@@ -182,7 +282,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "phone": phone,
         "sitedesc": sitedesc,
         // await FirebaseFirestore.instance.collection("sites").doc(sid).update({
-           "lastActivity": FieldValue.serverTimestamp(),
+        "lastActivity": FieldValue.serverTimestamp(),
         // });
       });
 

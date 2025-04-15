@@ -22,6 +22,7 @@ dependencies:
   firebase_storage: ^12.1.1
   image_picker: ^1.1.2
   dropdown_button2: ^2.3.9
+  supabase_flutter: ^2.0.0
   bot_toast: ^4.0.3
   hive: ^2.2.3
   dio: ^5.5.0+1
