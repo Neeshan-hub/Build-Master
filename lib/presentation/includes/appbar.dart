@@ -27,7 +27,7 @@ class CustomAppbar {
             title,
             style: TextStyle(
               color: AppColors.blue,
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
           ),

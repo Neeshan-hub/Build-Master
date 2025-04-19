@@ -188,11 +188,11 @@ class ShowCustomModal {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   CircleAvatar(
-                    radius: size.width / 8.2,
+                    radius: size.width / 11,
                     backgroundColor: AppColors.red,
                     child: Iconify(
                       FluentMdl2.sign_out,
-                      size: size.height / 90 * 6.76,
+                      size: size.height / 90 * 3.2,
                       color: AppColors.white,
                     ),
                   ),

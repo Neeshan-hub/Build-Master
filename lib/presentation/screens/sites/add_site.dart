@@ -47,7 +47,7 @@ class _AddSitePageState extends State<AddSitePage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final paddding = MediaQuery.of(context).padding;
-    final siteimageBloc = BlocProvider.of<PickimageBloc>(context);
+    BlocProvider.of<PickimageBloc>(context);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size(size.width, size.height / 90 * 8.5),
@@ -337,13 +337,12 @@ class _AddSitePageState extends State<AddSitePage> {
                                         dropdownvalue = "";
                                         selectedImages = [];
                                       });
-
-
                                     }
                                     if (state is FailedSiteState) {
                                       BotToast.closeAllLoading();
                                       BotToast.showText(
-                                        text: state.error ?? "Failed to add site",
+                                        text:
+                                            state.error ?? "Failed to add site",
                                         contentColor: Colors.red,
                                       );
                                     }
@@ -376,12 +375,12 @@ class _AddSitePageState extends State<AddSitePage> {
                                               phone: _phone.text,
                                               supervisor: dropdownvalue,
                                             );
-                                            context.read<SitesBloc>().add(AddSiteEvent(siteModel, selectedImages));
-
+                                            context.read<SitesBloc>().add(
+                                                AddSiteEvent(
+                                                    siteModel, selectedImages));
                                           }
                                         }
                                         print("2");
-
                                       },
                                       child: const Text(
                                         "Save",

@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/fluent_mdl2.dart';
 import 'package:iconify_flutter/icons/zondicons.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../bloc/dropdown/dropdown_bloc.dart';
 import '../../../bloc/sites/sites_bloc.dart';
@@ -600,10 +601,24 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                       fontSize: 16,
                                     ),
                                   ),
-                                  Icon(
-                                    Icons.phone,
-                                    size: size.height / 90 * 2.66,
-                                    color: AppColors.grey,
+                                  GestureDetector(
+                                    onTap: () async {
+                                      final Uri launchUri = Uri(
+                                        scheme: 'tel',
+                                        path: args[
+                                            'phone'], // Make sure args['phone'] contains the phone number
+                                      );
+                                      if (await canLaunchUrl(launchUri)) {
+                                        await launchUrl(launchUri);
+                                      } else {
+                                        throw 'Could not launch $launchUri';
+                                      }
+                                    },
+                                    child: Icon(
+                                      Icons.phone,
+                                      size: size.height / 90 * 2.66,
+                                      color: AppColors.grey,
+                                    ),
                                   )
                                 ],
                               ),
@@ -758,13 +773,13 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                           children: [
                                             Iconify(
                                               Zondicons.inbox_check,
-                                              color: AppColors.orange,
+                                              color: AppColors.blue,
                                               size: size.height / 90 * 4.2,
                                             ),
                                             Text(
                                               "Work in Progress",
                                               style: TextStyle(
-                                                color: AppColors.orange,
+                                                color: AppColors.blue,
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 14,
                                               ),
@@ -818,7 +833,6 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                 ),
                               ),
                               buildImageList(snapshot),
-
                             ],
                           ),
                         );
@@ -845,7 +859,6 @@ class _SiteDescriptionState extends State<SiteDescription> {
       ),
     );
   }
-
 
   Widget buildImageList(AsyncSnapshot snapshot) {
     final imageUrls = snapshot.data!['imageUrls'] as List?;
@@ -878,7 +891,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                         imageUrls[index],
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.error, size: 50),
+                            const Icon(Icons.error, size: 50),
                       ),
                     ),
                     Positioned(
@@ -901,12 +914,11 @@ class _SiteDescriptionState extends State<SiteDescription> {
               imageUrls[index],
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) =>
-              const Icon(Icons.error),
+                  const Icon(Icons.error),
             ),
           ),
         );
       },
     );
   }
-
 }

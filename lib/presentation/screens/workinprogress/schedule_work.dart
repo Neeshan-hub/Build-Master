@@ -96,9 +96,9 @@ class _ScheduleWorkState extends State<ScheduleWork> {
                           return Theme(
                             data: ThemeData.light().copyWith(
                                 colorScheme: ColorScheme.dark(
-                              primary: AppColors.yellow,
+                              primary: AppColors.white,
                               onPrimary: Colors.black,
-                              surface: AppColors.yellow,
+                              surface: AppColors.white,
                               onSurface: Colors.black,
                             )),
                             child: child!,
@@ -157,9 +157,9 @@ class _ScheduleWorkState extends State<ScheduleWork> {
                           return Theme(
                             data: ThemeData.light().copyWith(
                                 colorScheme: ColorScheme.dark(
-                              primary: AppColors.yellow,
+                              primary: AppColors.white,
                               onPrimary: Colors.black,
-                              surface: AppColors.yellow,
+                              surface: AppColors.white,
                               onSurface: Colors.black,
                             )),
                             child: child!,

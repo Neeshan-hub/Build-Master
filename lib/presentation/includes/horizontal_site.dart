@@ -107,7 +107,7 @@ class HorizontalSiteList extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: stocks.map((stock) {
                                   final stockData =
-                                  stock.data() as Map<String, dynamic>;
+                                      stock.data() as Map<String, dynamic>;
                                   final String itemName =
                                       stockData['itemname'] ?? 'Unknown Item';
                                   final String quantity =
@@ -118,7 +118,7 @@ class HorizontalSiteList extends StatelessWidget {
                                         vertical: 4.0),
                                     child: Row(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           itemName,
@@ -182,7 +182,6 @@ class HorizontalSiteList extends StatelessWidget {
                                 ),
                               ),
                             );
-
                           },
                         ),
                       ],
