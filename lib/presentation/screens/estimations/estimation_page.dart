@@ -868,6 +868,8 @@ class SaveButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // Access navigation arguments to get the role
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    print('this is the args');
+    print(args);
 
     return ElevatedButton(
       onPressed: () {

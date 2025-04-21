@@ -86,6 +86,7 @@ class ShowCustomModal {
 
   showDeleteDialog({
     required String id,
+    required String sname,
     required BuildContext context,
     required double height,
     required double width,
@@ -150,7 +151,7 @@ class ShowCustomModal {
                         ),
                         onPressed: () {
                           BlocProvider.of<SitesBloc>(context)
-                              .deleteSite(id, imageurl, context);
+                              .deleteSite(id, imageurl,sname, context);
                         },
                         child: const Text(
                           "Delete",

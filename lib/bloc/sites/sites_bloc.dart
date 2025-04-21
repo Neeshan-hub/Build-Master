@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,50 +21,51 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
   SitesBloc() : super(SitesInitial()) {
     on<SitesEvent>((event, emit) {});
     on<FailedSiteEvent>(
-      (event, emit) => emit(
+          (event, emit) => emit(
         FailedSiteState(error: event.error),
       ),
     );
     on<LoadingSiteEvent>(
-      (event, emit) => emit(LoadingSiteState()),
+          (event, emit) => emit(LoadingSiteState()),
     );
     on<LoadingCompleteEvent>(
-      (event, emit) => emit(LoadingCompleteState()),
+          (event, emit) => emit(LoadingCompleteState()),
     );
     on<CompletedSiteEvent>(
-      (event, emit) => emit(CompletedSiteState(sites: event.sites)),
+          (event, emit) => emit(CompletedSiteState(sites: event.sites)),
     );
     on<AddedSiteEvent>(
-      (event, emit) => emit(AddedSiteState(message: event.message)),
+          (event, emit) => emit(AddedSiteState(message: event.message)),
     );
     on<SiteDataEvent>(
-      (event, emit) => emit(SiteDataState(siteData: event.siteData)),
+          (event, emit) => emit(SiteDataState(siteData: event.siteData)),
     );
     on<SiteImagesEvent>(
-      (event, emit) => emit(SiteImagesState(siteImages: event.siteImages)),
+          (event, emit) => emit(SiteImagesState(siteImages: event.siteImages)),
     );
     on<LoadingDeleteCompleteEvent>(
-      (event, emit) => emit(LoadingCompleteState()),
+          (event, emit) => emit(LoadingCompleteState()),
     );
     on<LoadingDeleteSiteEvent>(
-      (event, emit) => emit(LoadingDeleteSiteState()),
+          (event, emit) => emit(LoadingDeleteSiteState()),
     );
     on<FailedDeleteSiteEvent>(
-      (event, emit) => emit(FailedDeleteSiteState()),
+          (event, emit) => emit(FailedDeleteSiteState()),
     );
     on<UpdatingSiteEvent>(
-      (event, emit) => emit(UpdatingSiteState()),
+          (event, emit) => emit(UpdatingSiteState()),
     );
     on<CompleteUpdatingSiteEvent>(
-      (event, emit) => emit(CompleteUpdatingSiteState()),
+          (event, emit) => emit(CompleteUpdatingSiteState()),
     );
     on<FailedUpdatingSiteEvent>(
-      (event, emit) => emit(FailedUpdatingSiteState()),
+          (event, emit) => emit(FailedUpdatingSiteState()),
     );
     on<AddSiteEvent>(addSite);
   }
 
   CollectionReference sites = FirebaseFirestore.instance.collection("sites");
+  CollectionReference notifications = FirebaseFirestore.instance.collection("notifications");
   String id = "";
 
   Future<void> addSite(AddSiteEvent event, Emitter<SitesState> emit) async {
@@ -98,6 +100,14 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "imageUrls": imageUrls,
         "lastActivity": FieldValue.serverTimestamp(),
       });
+
+      // Log notification for site addition
+      await _logNotification(
+        action: "Site Added",
+        details: "New site '${event.siteModel.sitename}' created",
+        siteId: id,
+      );
+
       add(CompletedSiteEvent());
       add(AddedSiteEvent(message: "Site added successfully"));
     } on FirebaseException catch (e) {
@@ -125,7 +135,6 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
       File file = File(image.path);
       if (!file.existsSync()) {
         print('image 2 re');
-
         return null;
       }
       print('image 3 re');
@@ -170,17 +179,14 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
           .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
           .replaceAll(' ', '_');
 
-// Create unique filename with timestamp and siteId
       String fileName =
           "${DateTime.now().millisecondsSinceEpoch}_$siteId$sanitizedName";
       print('image 4 re');
 
-// Upload to Supabase Storage
       final supabase = Supabase.instance.client;
       await supabase.storage.from('sites').upload(fileName, file);
       print('image 6 re');
 
-// Return public URL
       return supabase.storage.from('sites').getPublicUrl(fileName);
     } catch (e) {
       print(e);
@@ -190,22 +196,18 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
 
   Future<String?> uploadFile(XFile image, String siteId) async {
     try {
-      // Sanitize image name to avoid invalid characters
       String sanitizedName = image.name
           .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
           .replaceAll(' ', '_');
 
-      // Use siteId to ensure unique path
       Reference reference = FirebaseStorage.instance
           .ref()
           .child("siteimages")
           .child(siteId)
           .child("${DateTime.now().millisecondsSinceEpoch}_$sanitizedName");
 
-      // Upload the file
       UploadTask uploadTask = reference.putFile(File(image.path));
 
-      // Wait for upload completion and check state
       TaskSnapshot snapshot = await uploadTask;
       if (snapshot.state == TaskState.success) {
         String downloadUrl = await reference.getDownloadURL();
@@ -220,7 +222,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     }
   }
 
-  Future<void> deleteSite(String sid, List<String> imageurl, context) async {
+  Future<void> deleteSite(String sid, List<String> imageurl,String sname, context) async {
     final size = MediaQuery.of(context).size;
     try {
       BotToast.showCustomLoading(
@@ -230,7 +232,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
       );
 
       Future<QuerySnapshot> siteimages =
-          sites.doc(sid).collection("siteimages").get();
+      sites.doc(sid).collection("siteimages").get();
       siteimages.then((value) {
         for (QueryDocumentSnapshot element in value.docs) {
           sites.doc(id).collection("siteimages").doc(element.id).delete();
@@ -243,6 +245,13 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
       for (String url in imageurl) {
         await FirebaseStorage.instance.refFromURL(url).delete();
       }
+
+      // Log notification for site deletion
+      await _logNotification(
+        action: "Site Deleted",
+        details: "Site '$sname ' deleted",
+        siteId: sid,
+      );
 
       BotToast.closeAllLoading();
       Navigator.of(context).pop();
@@ -273,7 +282,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     try {
       add(UpdatingSiteEvent());
       DocumentReference sites =
-          FirebaseFirestore.instance.collection("sites").doc(sid);
+      FirebaseFirestore.instance.collection("sites").doc(sid);
 
       await sites.update({
         "sitename": sitename,
@@ -281,17 +290,46 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "clientname": clientname,
         "phone": phone,
         "sitedesc": sitedesc,
-        // await FirebaseFirestore.instance.collection("sites").doc(sid).update({
         "lastActivity": FieldValue.serverTimestamp(),
-        // });
       });
 
       if (supervisor.isNotEmpty) {
         await sites.update({"supervisor": supervisor});
       }
+
+      // Log notification for site update
+      await _logNotification(
+        action: "Site Updated",
+        details: "Updated site '$sitename' ",
+        siteId: sid,
+      );
+
       add(CompleteUpdatingSiteEvent());
     } on FirebaseException catch (e) {
       add(FailedUpdatingSiteEvent(error: e.message!));
+    }
+  }
+
+  Future<void> _logNotification({
+    required String action,
+    required String details,
+    required String siteId,
+  }) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      final userId = user?.uid ?? "unknown";
+      final userName = user?.displayName ?? "unknown";
+
+      await notifications.add({
+        "action": action,
+        "details": details,
+        "siteId": siteId,
+        "userId": userId,
+        "userName": userName,
+        "timestamp": FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print("Error logging notification: $e");
     }
   }
 }

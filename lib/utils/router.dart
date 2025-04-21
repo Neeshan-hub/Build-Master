@@ -26,6 +26,7 @@ import 'package:construction/utils/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../presentation/screens/InAppNotification/inappNotification.dart';
 import '../presentation/screens/auth/login.dart';
 import '../presentation/screens/estimations/estimation_page.dart';
 import '../presentation/screens/orders/site_order.dart';
@@ -111,6 +112,10 @@ class AppRouter {
         return MaterialPageRoute(
             builder: (context) => const WorkReportSignaturePadPage(),
             settings: settings);
+
+      case notifications: // Added route for NotificationsPage
+        return MaterialPageRoute(
+            builder: (context) => const NotificationsPage(), settings: settings);
     }
     return null;
   }

@@ -313,6 +313,7 @@ class _SitePageState extends State<SitePage> {
 
                                                       ShowCustomModal()
                                                           .showDeleteDialog(
+                                                        sname:  snapshot.data!.docs[index]['clientname'],
                                                         id: snapshot.data!
                                                             .docs[index]['sid'],
                                                         context: context,

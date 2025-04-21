@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:construction/main.dart';
-
 import 'package:construction/utils/app_colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/emojione_monotone.dart';
@@ -68,7 +66,8 @@ class _DashboardState extends State<Dashboard> {
                                 color: AppColors.blue,
                               )),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () =>
+                            Navigator.pushNamed(context, notifications),
                         icon: Iconify(
                           Zondicons.notification,
                           color: AppColors.blue,
