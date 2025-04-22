@@ -17,7 +17,7 @@ class EstimationPage extends StatefulWidget {
 
 class _EstimationPageState extends State<EstimationPage> {
   final _materialFormKey = GlobalKey<FormState>(); // Form key for materials
-  final _laborFormKey = GlobalKey<FormState>();   // Form key for labor
+  final _laborFormKey = GlobalKey<FormState>(); // Form key for labor
   final _materialNameController = TextEditingController();
   final _quantityController = TextEditingController();
   final _unitCostController = TextEditingController();
@@ -38,8 +38,12 @@ class _EstimationPageState extends State<EstimationPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map<String, dynamic> && args.containsKey('sid') && args['sid'] != null) {
-      context.read<EstimationBloc>().add(FetchEstimationEvent(sid: args['sid']));
+    if (args is Map<String, dynamic> &&
+        args.containsKey('sid') &&
+        args['sid'] != null) {
+      context
+          .read<EstimationBloc>()
+          .add(FetchEstimationEvent(sid: args['sid']));
     } else {
       _logger.e('Invalid navigation arguments: $args');
     }
@@ -68,7 +72,10 @@ class _EstimationPageState extends State<EstimationPage> {
     final quantity = double.tryParse(_quantityController.text);
     final unitCost = double.tryParse(_unitCostController.text);
 
-    if (quantity == null || unitCost == null || quantity <= 0 || unitCost <= 0) {
+    if (quantity == null ||
+        unitCost == null ||
+        quantity <= 0 ||
+        unitCost <= 0) {
       BotToast.showText(
         text: "Enter valid positive numbers for quantity and unit cost",
         contentColor: AppColors.red,
@@ -156,11 +163,11 @@ class _EstimationPageState extends State<EstimationPage> {
     if (_cachedTotalCost != null) return _cachedTotalCost!;
     final materialCost = materials.fold<double>(
       0,
-          (sum, item) => sum + (item['totalCost'] as double? ?? 0),
+      (sum, item) => sum + (item['totalCost'] as double? ?? 0),
     );
     final laborCost = laborTasks.fold<double>(
       0,
-          (sum, item) => sum + (item['totalCost'] as double? ?? 0),
+      (sum, item) => sum + (item['totalCost'] as double? ?? 0),
     );
     _cachedTotalCost = materialCost + laborCost;
     return _cachedTotalCost!;
@@ -169,7 +176,8 @@ class _EstimationPageState extends State<EstimationPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
     if (args == null || !args.containsKey('sid') || args['sid'] == null) {
       return Scaffold(
@@ -186,7 +194,7 @@ class _EstimationPageState extends State<EstimationPage> {
       appBar: PreferredSize(
         preferredSize: Size(size.width, size.height * 0.09),
         child: CustomAppbar(
-          title: "${args['title'] ?? 'Site'} Estimation",
+          title: "${args['title'] ?? 'Site'} ",
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
             onPressed: () => Navigator.of(context).pop(),
@@ -296,7 +304,7 @@ class _EstimationPageState extends State<EstimationPage> {
                 SaveButton(
                   size: size,
                   materialFormKey: _materialFormKey, // Pass material form key
-                  laborFormKey: _laborFormKey,       // Pass labor form key
+                  laborFormKey: _laborFormKey, // Pass labor form key
                   materials: materials,
                   laborTasks: laborTasks,
                   sid: args['sid'],
@@ -315,8 +323,8 @@ class _EstimationPageState extends State<EstimationPage> {
                 if (state is EstimationFailure)
                   RetryButton(
                     onRetry: () => context.read<EstimationBloc>().add(
-                      FetchEstimationEvent(sid: args['sid']),
-                    ),
+                          FetchEstimationEvent(sid: args['sid']),
+                        ),
                   ),
               ],
             );
@@ -379,7 +387,7 @@ class MaterialInputSection extends StatelessWidget {
               ),
             ),
             validator: (value) =>
-            value?.isEmpty ?? true ? "Enter material name" : null,
+                value?.isEmpty ?? true ? "Enter material name" : null,
           ),
           SizedBox(height: size.height * 0.01),
           Row(
@@ -397,7 +405,8 @@ class MaterialInputSection extends StatelessWidget {
                   validator: (value) {
                     if (value?.isEmpty ?? true) return "Enter quantity";
                     final num = double.tryParse(value!);
-                    if (num == null || num <= 0) return "Enter valid positive number";
+                    if (num == null || num <= 0)
+                      return "Enter valid positive number";
                     return null;
                   },
                 ),
@@ -416,7 +425,8 @@ class MaterialInputSection extends StatelessWidget {
                   validator: (value) {
                     if (value?.isEmpty ?? true) return "Enter unit cost";
                     final num = double.tryParse(value!);
-                    if (num == null || num <= 0) return "Enter valid positive number";
+                    if (num == null || num <= 0)
+                      return "Enter valid positive number";
                     return null;
                   },
                 ),
@@ -522,8 +532,8 @@ class MaterialListSection extends StatelessWidget {
                 title: Text(material['name'] ?? 'Unknown'),
                 subtitle: Text(
                   "Qty: ${material['quantity']?.toString() ?? '0'} | "
-                      "Unit Cost: NRS. ${material['unitCost']?.toStringAsFixed(2) ?? '0.00'} | "
-                      "Total: NRS. ${material['totalCost']?.toStringAsFixed(2) ?? '0.00'}",
+                  "Unit Cost: NRS. ${material['unitCost']?.toStringAsFixed(2) ?? '0.00'} | "
+                  "Total: NRS. ${material['totalCost']?.toStringAsFixed(2) ?? '0.00'}",
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -599,7 +609,7 @@ class LaborInputSection extends StatelessWidget {
               ),
             ),
             validator: (value) =>
-            value?.isEmpty ?? true ? "Enter task name" : null,
+                value?.isEmpty ?? true ? "Enter task name" : null,
           ),
           SizedBox(height: size.height * 0.01),
           Row(
@@ -617,7 +627,8 @@ class LaborInputSection extends StatelessWidget {
                   validator: (value) {
                     if (value?.isEmpty ?? true) return "Enter hours";
                     final num = double.tryParse(value!);
-                    if (num == null || num <= 0) return "Enter valid positive number";
+                    if (num == null || num <= 0)
+                      return "Enter valid positive number";
                     return null;
                   },
                 ),
@@ -636,7 +647,8 @@ class LaborInputSection extends StatelessWidget {
                   validator: (value) {
                     if (value?.isEmpty ?? true) return "Enter hourly rate";
                     final num = double.tryParse(value!);
-                    if (num == null || num <= 0) return "Enter valid positive number";
+                    if (num == null || num <= 0)
+                      return "Enter valid positive number";
                     return null;
                   },
                 ),
@@ -742,8 +754,8 @@ class LaborListSection extends StatelessWidget {
                 title: Text(task['task'] ?? 'Unknown'),
                 subtitle: Text(
                   "Hours: ${task['hours']?.toString() ?? '0'} | "
-                      "Rate: NRS. ${task['rate']?.toStringAsFixed(2) ?? '0.00'} | "
-                      "Total: NRS. ${task['totalCost']?.toStringAsFixed(2) ?? '0.00'}",
+                  "Rate: NRS. ${task['rate']?.toStringAsFixed(2) ?? '0.00'} | "
+                  "Total: NRS. ${task['totalCost']?.toStringAsFixed(2) ?? '0.00'}",
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -785,11 +797,11 @@ class SummarySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final materialCost = materials.fold<double>(
       0,
-          (sum, item) => sum + (item['totalCost'] as double? ?? 0),
+      (sum, item) => sum + (item['totalCost'] as double? ?? 0),
     );
     final laborCost = laborTasks.fold<double>(
       0,
-          (sum, item) => sum + (item['totalCost'] as double? ?? 0),
+      (sum, item) => sum + (item['totalCost'] as double? ?? 0),
     );
 
     return Container(
@@ -843,7 +855,7 @@ class SummarySection extends StatelessWidget {
 class SaveButton extends StatelessWidget {
   final Size size;
   final GlobalKey<FormState> materialFormKey; // Material form key
-  final GlobalKey<FormState> laborFormKey;   // Labor form key
+  final GlobalKey<FormState> laborFormKey; // Labor form key
   final List<Map<String, dynamic>> materials;
   final List<Map<String, dynamic>> laborTasks;
   final String sid;
@@ -867,7 +879,8 @@ class SaveButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Access navigation arguments to get the role
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     print('this is the args');
     print(args);
 
@@ -876,54 +889,57 @@ class SaveButton extends StatelessWidget {
         // Check if the user is a supervisor
         if (args == null || args['role'] != 'supervisor') {
           BotToast.showText(
-              text: "Only supervisors can save estimations",
-              contentColor: AppColors.red,
-              duration:  const Duration(seconds: 3),
-        );
-        return;
+            text: "Only supervisors can save estimations",
+            contentColor: AppColors.red,
+            duration: const Duration(seconds: 3),
+          );
+          return;
         }
 
-        final isAddingMaterial = materialControllers.any((controller) => controller.text.isNotEmpty);
-        final isAddingLabor = laborControllers.any((controller) => controller.text.isNotEmpty);
+        final isAddingMaterial =
+            materialControllers.any((controller) => controller.text.isNotEmpty);
+        final isAddingLabor =
+            laborControllers.any((controller) => controller.text.isNotEmpty);
 
         // Validate material form if there are material inputs
         bool isMaterialValid = true;
         if (isAddingMaterial) {
-        isMaterialValid = materialFormKey.currentState!.validate();
+          isMaterialValid = materialFormKey.currentState!.validate();
         }
 
         // Validate labor form if there are labor inputs
         bool isLaborValid = true;
         if (isAddingLabor) {
-        isLaborValid = laborFormKey.currentState!.validate();
+          isLaborValid = laborFormKey.currentState!.validate();
         }
 
         // Show error if any form is invalid
-        if ((isAddingMaterial && !isMaterialValid) || (isAddingLabor && !isLaborValid)) {
-        BotToast.showText(
-        text: "Please correct the input fields",
-        contentColor: AppColors.red,
-        );
-        return;
+        if ((isAddingMaterial && !isMaterialValid) ||
+            (isAddingLabor && !isLaborValid)) {
+          BotToast.showText(
+            text: "Please correct the input fields",
+            contentColor: AppColors.red,
+          );
+          return;
         }
 
         // Ensure at least one material or labor task is added
         if (materials.isEmpty && laborTasks.isEmpty) {
-        BotToast.showText(
-        text: "Add at least one material or labor task",
-        contentColor: AppColors.red,
-        );
-        return;
+          BotToast.showText(
+            text: "Add at least one material or labor task",
+            contentColor: AppColors.red,
+          );
+          return;
         }
 
         context.read<EstimationBloc>().add(
-        SaveEstimationEvent(
-        sid: sid,
-        materials: materials,
-        laborTasks: laborTasks,
-        totalCost: totalCost,
-        ),
-        );
+              SaveEstimationEvent(
+                sid: sid,
+                materials: materials,
+                laborTasks: laborTasks,
+                totalCost: totalCost,
+              ),
+            );
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.blue,
@@ -953,7 +969,8 @@ class RetryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.02),
+      padding: EdgeInsets.symmetric(
+          vertical: MediaQuery.of(context).size.height * 0.02),
       child: ElevatedButton.icon(
         onPressed: onRetry,
         icon: const Icon(Icons.refresh),
@@ -978,7 +995,8 @@ class EstimationBloc extends Bloc<EstimationEvent, EstimationState> {
     on<SaveEstimationEvent>(_onSaveEstimation);
   }
 
-  Future<void> _onFetchEstimation(FetchEstimationEvent event, Emitter<EstimationState> emit) async {
+  Future<void> _onFetchEstimation(
+      FetchEstimationEvent event, Emitter<EstimationState> emit) async {
     emit(EstimationLoading());
     try {
       final docSnapshot = await FirebaseFirestore.instance
@@ -991,20 +1009,26 @@ class EstimationBloc extends Bloc<EstimationEvent, EstimationState> {
       emit(EstimationLoaded(estimation: docSnapshot.data() ?? {}));
     } on FirebaseException catch (e) {
       _logger.e('Firestore error fetching estimation: ${e.code}', error: e);
-      emit(EstimationFailure(error: 'Failed to fetch estimation: ${e.message}'));
+      emit(
+          EstimationFailure(error: 'Failed to fetch estimation: ${e.message}'));
     } catch (e) {
       _logger.e('Unexpected error fetching estimation', error: e);
       emit(EstimationFailure(error: 'Unexpected error: $e'));
     }
   }
 
-  Future<void> _onSaveEstimation(SaveEstimationEvent event, Emitter<EstimationState> emit) async {
+  Future<void> _onSaveEstimation(
+      SaveEstimationEvent event, Emitter<EstimationState> emit) async {
     emit(EstimationLoading());
     try {
-      final siteDoc = await FirebaseFirestore.instance.collection('sites').doc(event.sid).get();
+      final siteDoc = await FirebaseFirestore.instance
+          .collection('sites')
+          .doc(event.sid)
+          .get();
       if (!siteDoc.exists) {
         _logger.e('Site not found: ${event.sid}');
-        emit(EstimationFailure(error: "Site with ID ${event.sid} does not exist"));
+        emit(EstimationFailure(
+            error: "Site with ID ${event.sid} does not exist"));
         return;
       }
 
