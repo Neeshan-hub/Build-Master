@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({Key? key}) : super(key: key);
 
+  static const Color primaryColor = Color(0xFF262262); // Your new primary color
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +18,7 @@ class NotificationsPage extends StatelessWidget {
             fontSize: 20,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -55,10 +57,14 @@ class NotificationsPage extends StatelessWidget {
             itemCount: notifications.length,
             itemBuilder: (context, index) {
               final notification = notifications[index];
-              final action = notification['action'] as String? ?? 'Unknown Action';
-              final details = notification['details'] as String? ?? 'No details';
-              final userName = notification['userName'] as String? ?? 'Unknown User';
-              final timestamp = (notification['timestamp'] as Timestamp?)?.toDate();
+              final action =
+                  notification['action'] as String? ?? 'Unknown Action';
+              final details =
+                  notification['details'] as String? ?? 'No details';
+              final userName =
+                  notification['userName'] as String? ?? 'Unknown User';
+              final timestamp =
+                  (notification['timestamp'] as Timestamp?)?.toDate();
               final formattedTime = timestamp != null
                   ? DateFormat('MMM d, yyyy - HH:mm').format(timestamp)
                   : 'Unknown Time';
@@ -78,7 +84,7 @@ class NotificationsPage extends StatelessWidget {
                         children: [
                           Icon(
                             _getIconForAction(action),
-                            color: Colors.blueAccent,
+                            color: primaryColor,
                             size: 24,
                           ),
                           const SizedBox(width: 8),
@@ -106,14 +112,6 @@ class NotificationsPage extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Text(
-                          //   'By: $userName',
-                          //   style: const TextStyle(
-                          //     fontSize: 12,
-                          //     color: Colors.grey,
-                          //     fontStyle: FontStyle.italic,
-                          //   ),
-                          // ),
                           Text(
                             formattedTime,
                             style: const TextStyle(

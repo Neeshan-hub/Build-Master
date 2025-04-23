@@ -50,7 +50,7 @@ class _DashboardState extends State<Dashboard> {
                               },
                               icon: Iconify(
                                 EmojioneMonotone.construction_worker,
-                                color: AppColors.blue,
+                                color: AppColors.white,
                               ),
                             )
                           : IconButton(
@@ -70,16 +70,16 @@ class _DashboardState extends State<Dashboard> {
                             Navigator.pushNamed(context, notifications),
                         icon: Iconify(
                           Zondicons.notification,
-                          color: AppColors.blue,
+                          color: AppColors.white,
                         ),
                       ),
                     ],
                     leading: Container(
                       margin:
                           EdgeInsets.symmetric(horizontal: padding.top * 0.1),
-                      child: Image.asset(
-                        "assets/images/logo.png",
-                      ),
+                      // child: Image.asset(
+                      //   // "assets/images/logo.png",
+                      // ),
                     ),
                     title: "BuildMaster",
                     bgcolor: AppColors.white,

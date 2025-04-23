@@ -21,21 +21,17 @@ class CustomAppbar {
           iconTheme: IconThemeData(color: AppColors.blue),
           automaticallyImplyLeading: false,
           leading: leading,
-          backgroundColor: bgcolor,
+          backgroundColor: AppColors.blue,
           centerTitle: true,
           title: Text(
             title,
             style: TextStyle(
-              color: AppColors.blue,
+              color: AppColors.white,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
           ),
           actions: action,
-        ),
-        Divider(
-          thickness: 4,
-          color: AppColors.yellow,
         ),
       ],
     );

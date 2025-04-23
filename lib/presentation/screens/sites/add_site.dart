@@ -58,6 +58,7 @@ class _AddSitePageState extends State<AddSitePage> {
             icon: Icon(
               Icons.arrow_back_ios_new,
               size: size.height / 90 * 2.3,
+              color: AppColors.white,
             ),
             onPressed: () {
               Navigator.of(context).pop();

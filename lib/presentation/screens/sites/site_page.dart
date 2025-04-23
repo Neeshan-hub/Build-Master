@@ -64,8 +64,7 @@ class _SitePageState extends State<SitePage> {
                     padding:
                         EdgeInsets.symmetric(horizontal: paddding.top * 0.6),
                     child: CircleAvatar(
-                      backgroundColor: AppColors.yellow,
-                      radius: size.width / 21.4,
+                      backgroundColor: AppColors.white,
                       child: IconButton(
                         onPressed: () {
                           Navigator.of(context).pushNamed(addsitepage);
@@ -82,7 +81,7 @@ class _SitePageState extends State<SitePage> {
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new,
-              color: AppColors.blue,
+              color: AppColors.white,
             ),
             onPressed: () {
               Navigator.of(context).pop();
@@ -313,7 +312,9 @@ class _SitePageState extends State<SitePage> {
 
                                                       ShowCustomModal()
                                                           .showDeleteDialog(
-                                                        sname:  snapshot.data!.docs[index]['clientname'],
+                                                        sname: snapshot.data!
+                                                                .docs[index]
+                                                            ['clientname'],
                                                         id: snapshot.data!
                                                             .docs[index]['sid'],
                                                         context: context,
