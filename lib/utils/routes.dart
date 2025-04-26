@@ -27,4 +27,4 @@ const String stockSignaturePadPage = "stockSignaturePadPage";
 const String workInvoiceSignaturePadPage = "workInvoiceSignaturePadPage";
 const String workimagepage = "workimagepage";
 const String subtasksPage = 'subtasks_page';
-const String notifications = 'notifications'; 
+const String notifications = 'notifications';

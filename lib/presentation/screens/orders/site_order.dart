@@ -874,12 +874,13 @@ class _OrderPageState extends State<OrderPage> {
       appBar: PreferredSize(
         preferredSize: Size(size.width, size.height / 90 * 8.5),
         child: CustomAppbar(
-          bgcolor: AppColors.white,
+          bgcolor: AppColors.blue,
           title: args['sitename'],
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new,
               size: size.height / 90 * 2.3,
+              color: AppColors.white,
             ),
             onPressed: () {
               Navigator.of(context).pop();
@@ -891,11 +892,11 @@ class _OrderPageState extends State<OrderPage> {
                 showAddOrderModal();
               },
               icon: CircleAvatar(
-                backgroundColor: AppColors.yellow,
+                backgroundColor: AppColors.blue,
                 radius: size.width / 12.4,
                 child: Icon(
                   Icons.add,
-                  color: AppColors.blue,
+                  color: AppColors.white,
                   size: size.height / 90 * 2.3,
                 ),
               ),

@@ -3,7 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:meta/meta.dart'; // Add this import for @immutable
-import 'package:image_picker/image_picker.dart'; // Ensure XFile is available
+import 'package:image_picker/image_picker.dart';
 
 part 'pickimage_event.dart';
 part 'pickimage_state.dart';

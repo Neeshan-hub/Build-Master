@@ -23,11 +23,11 @@ class SettingsPage extends StatelessWidget {
         preferredSize: Size(size.width, size.height / 90 * 8.5),
         child: CustomAppbar(
           title: "Settings",
-          bgcolor: AppColors.customWhite,
+          bgcolor: AppColors.blue,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new,
-              color: AppColors.blue,
+              color: AppColors.white,
             ),
             onPressed: () {
               Navigator.of(context).pop();

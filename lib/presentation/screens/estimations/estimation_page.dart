@@ -196,7 +196,7 @@ class _EstimationPageState extends State<EstimationPage> {
         child: CustomAppbar(
           title: "${args['title'] ?? 'Site'} ",
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ).customAppBar(),

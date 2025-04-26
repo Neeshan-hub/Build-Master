@@ -423,21 +423,22 @@ class _SiteDescriptionState extends State<SiteDescription> {
                       );
                     },
                     icon: CircleAvatar(
-                      backgroundColor: AppColors.yellow,
+                      backgroundColor: AppColors.blue,
                       radius: size.width / 12.4,
                       child: Iconify(
                         FluentMdl2.edit,
-                        color: AppColors.blue,
+                        color: AppColors.white,
                         size: size.height / 90 * 2.3,
                       ),
                     ),
                   )
                 : Container(),
           ],
-          bgcolor: AppColors.white,
+          bgcolor: AppColors.blue,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new,
+              color: Colors.white,
               size: size.height / 90 * 2.3,
             ),
             onPressed: () {
@@ -719,7 +720,6 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                             'sid': args['sid'],
                                             'title': 'Estimation',
                                             "role": args['role'],
-
                                           },
                                         );
                                       },

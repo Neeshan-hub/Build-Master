@@ -404,21 +404,22 @@ class _UsersPageState extends State<UsersPage> {
       appBar: PreferredSize(
         preferredSize: Size(size.width, size.height / 90 * 8.5),
         child: CustomAppbar(
-          bgcolor: AppColors.white,
+          titleColor: AppColors.white,
+          bgcolor: AppColors.blue,
           title: "Available Users",
           action: [
             Padding(
               padding: EdgeInsets.only(right: padding.top * 0.4),
               child: CircleAvatar(
                 radius: size.width / 21.4,
-                backgroundColor: AppColors.yellow,
+                backgroundColor: AppColors.blue,
                 child: IconButton(
                   onPressed: () {
                     Navigator.of(context).pushNamed(register);
                   },
                   icon: Icon(
                     Icons.add,
-                    color: AppColors.blue,
+                    color: AppColors.white,
                   ),
                 ),
               ),
@@ -430,7 +431,7 @@ class _UsersPageState extends State<UsersPage> {
             },
             icon: Icon(
               Icons.arrow_back_ios_new,
-              color: AppColors.blue,
+              color: AppColors.white,
             ),
           ),
         ).customAppBar(),

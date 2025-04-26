@@ -165,7 +165,6 @@ class _SiteStocksState extends State<SiteStocks> {
                             TextButton(
                               style: ElevatedButton.styleFrom(
                                 elevation: 0,
-
                                 foregroundColor: AppColors.blue,
                               ),
                               onPressed: () {
@@ -826,12 +825,13 @@ class _SiteStocksState extends State<SiteStocks> {
       appBar: PreferredSize(
         preferredSize: Size(size.width, size.height / 90 * 8.5),
         child: CustomAppbar(
-          bgcolor: AppColors.white,
+          bgcolor: AppColors.blue,
           title: args['sitename'],
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new,
               size: size.height / 90 * 2.3,
+              color: AppColors.white,
             ),
             onPressed: () {
               Navigator.of(context).pop();
@@ -843,11 +843,11 @@ class _SiteStocksState extends State<SiteStocks> {
                 showAddStockModal();
               },
               icon: CircleAvatar(
-                backgroundColor: AppColors.yellow,
+                backgroundColor: AppColors.blue,
                 radius: size.width / 12.4,
                 child: Icon(
                   Icons.add,
-                  color: AppColors.blue,
+                  color: AppColors.white,
                 ),
               ),
             ),
@@ -884,11 +884,12 @@ class _SiteStocksState extends State<SiteStocks> {
                                 color: AppColors.white,
                                 horizontalMargin: padding.top * 0.4,
                                 verticalMargin: padding.top * 0.2,
-                                child:// In the build method of _SiteStocksState, update the StockSearchBar widget:
-                                StockSearchBar(
+                                child: // In the build method of _SiteStocksState, update the StockSearchBar widget:
+                                    StockSearchBar(
                                   siteId: args['sid'],
                                   focusNode: searchFocusNode,
-                                  onStockSelected: showEditSiteModal, // Pass the edit dialog function as callback
+                                  onStockSelected:
+                                      showEditSiteModal, // Pass the edit dialog function as callback
                                 ),
                               ).customBox(),
                             ),

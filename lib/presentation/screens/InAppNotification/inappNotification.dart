@@ -84,7 +84,7 @@ class NotificationsPage extends StatelessWidget {
                         children: [
                           Icon(
                             _getIconForAction(action),
-                            color: primaryColor,
+                            color: const Color.fromARGB(255, 98, 34, 34),
                             size: 24,
                           ),
                           const SizedBox(width: 8),

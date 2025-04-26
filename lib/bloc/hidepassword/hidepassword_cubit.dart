@@ -1,11 +1,15 @@
-import 'package:bloc/bloc.dart';
-
-part 'hidepassword_state.dart';
+// Create a new file: hidepassword_cubit.dart
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HidepasswordCubit extends Cubit<HidepasswordState> {
   HidepasswordCubit() : super(HidepasswordState(hidepassword: true));
 
-  void hidepassword(bool hidepassword) {
-    emit(HidepasswordState(hidepassword: !hidepassword));
+  void hidepassword(bool currentState) {
+    emit(HidepasswordState(hidepassword: !currentState));
   }
+}
+
+class HidepasswordState {
+  final bool hidepassword;
+  HidepasswordState({required this.hidepassword});
 }

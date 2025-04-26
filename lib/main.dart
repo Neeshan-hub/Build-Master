@@ -1,6 +1,4 @@
 import 'package:bot_toast/bot_toast.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:construction/bloc/auth/auth_bloc.dart';
 import 'package:construction/bloc/dropdown/dropdown_bloc.dart';
 import 'package:construction/bloc/forgotpassword/forgot_password_bloc.dart';
@@ -14,7 +12,6 @@ import 'package:construction/bloc/stock/stocks_bloc.dart';
 import 'package:construction/bloc/users/users_bloc.dart';
 import 'package:construction/services/local_notifications.dart';
 import 'package:construction/utils/app_colors.dart';
-
 import 'package:construction/utils/router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -26,21 +23,38 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize local notifications
   await LocalNotificationService().initialize();
-  await Supabase.initialize(
-    url: 'https://lskkhschidhabbdcgndz.supabase.co', // From Step 1.3
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxza2toc2NoaWRoYWJiZGNnbmR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDI4NTQsImV4cCI6MjA2MDMxODg1NH0.H91J5IDmjkfjjwwJq5QutazPDgk7Hy9nIqOuduIBAM0', // From Step 1.3
-  );
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print("Firebase initialized successfully");
+  } catch (e) {
+    print("Error initializing Firebase: $e");
+  }
+
+  // Initialize Supabase
+  try {
+    await Supabase.initialize(
+      url: 'https://lskkhschidhabbdcgndz.supabase.co',
+      anonKey: 'your_anon_key', // Replace with your actual key
+    );
+    print("Supabase initialized successfully");
+  } catch (e) {
+    print("Error initializing Supabase: $e");
+  }
+
+  // Start the app
   runApp(
     BuildMaster(
       router: AppRouter(),
     ),
   );
 }
-
 
 class BuildMaster extends StatelessWidget {
   final AppRouter router;

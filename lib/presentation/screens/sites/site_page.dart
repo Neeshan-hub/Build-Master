@@ -57,21 +57,22 @@ class _SitePageState extends State<SitePage> {
         preferredSize: Size(size.width, size.height / 90 * 8.5),
         child: CustomAppbar(
           title: "Sites",
-          bgcolor: AppColors.white,
+          bgcolor: AppColors.blue,
           action: [
             args['role'] == "Admin"
                 ? Container(
                     padding:
                         EdgeInsets.symmetric(horizontal: paddding.top * 0.6),
                     child: CircleAvatar(
-                      backgroundColor: AppColors.white,
+                      backgroundColor: AppColors.blue,
                       child: IconButton(
                         onPressed: () {
                           Navigator.of(context).pushNamed(addsitepage);
                         },
                         icon: Icon(
                           Icons.add,
-                          color: AppColors.blue,
+                          color: AppColors.white,
+                          size: 30,
                         ),
                       ),
                     ),

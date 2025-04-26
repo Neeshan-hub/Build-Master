@@ -254,20 +254,21 @@ class _WorkInProgressPageState extends State<WorkInProgressPage> {
                 },
                 icon: CircleAvatar(
                   radius: size.width / 12.1,
-                  backgroundColor: AppColors.yellow,
+                  backgroundColor: AppColors.blue,
                   child: Icon(
                     Icons.add,
-                    color: AppColors.blue,
+                    color: AppColors.white,
                   ),
                 ),
               ),
             ],
             title: "Work in Progress",
-            bgcolor: AppColors.white,
+            bgcolor: AppColors.blue,
             leading: IconButton(
               icon: const Icon(
                 Icons.arrow_back_ios_new,
                 size: 24,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -497,8 +498,7 @@ class _WorkInProgressPageState extends State<WorkInProgressPage> {
                                                     double.parse(stocks.text),
                                                     dropdownvalue,
                                                   );
-                                                  stocks.text="";
-
+                                                  stocks.text = "";
                                                 }
                                               }
                                             }
@@ -693,10 +693,16 @@ class _WorkInProgressPageState extends State<WorkInProgressPage> {
                                   "sid": snapshot.data!.docs[index]['sid'],
                                   "wid": snapshot.data!.docs[index]['wid'],
                                   "title": snapshot.data!.docs[index]['title'],
-                                  "startdate": snapshot.data!.docs[index]['startdate'].toDate(),
-                                  "endDate": snapshot.data!.docs[index]['endDate'].toDate(),
-                                  "workdesc": snapshot.data!.docs[index]['workdesc'],
-                                  "progress": snapshot.data!.docs[index]['progress'],
+                                  "startdate": snapshot
+                                      .data!.docs[index]['startdate']
+                                      .toDate(),
+                                  "endDate": snapshot
+                                      .data!.docs[index]['endDate']
+                                      .toDate(),
+                                  "workdesc": snapshot.data!.docs[index]
+                                      ['workdesc'],
+                                  "progress": snapshot.data!.docs[index]
+                                      ['progress'],
                                 },
                               );
                               // showProgressModal(

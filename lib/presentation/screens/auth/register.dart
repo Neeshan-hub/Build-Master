@@ -49,11 +49,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           preferredSize: Size(size.width, size.height / 90 * 8.5),
           child: CustomAppbar(
             title: "Add a New User",
-            bgcolor: AppColors.white,
+            bgcolor: AppColors.blue,
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back_ios_new,
                 size: size.height / 90 * 2.3,
+                color: AppColors.white,
               ),
               onPressed: () {
                 Navigator.of(context).pop();

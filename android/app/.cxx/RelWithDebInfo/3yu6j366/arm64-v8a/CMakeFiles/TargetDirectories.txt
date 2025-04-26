@@ -1,0 +1,2 @@
+/Users/nishan/construction/android/app/.cxx/RelWithDebInfo/3yu6j366/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/nishan/construction/android/app/.cxx/RelWithDebInfo/3yu6j366/arm64-v8a/CMakeFiles/rebuild_cache.dir
