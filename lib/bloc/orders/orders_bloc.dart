@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:iconify_flutter/icons/carbon.dart';
 
 import '../../data/models/order_model.dart';
 
@@ -152,6 +153,20 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       add(FailedUpdatingOrderQuantityEvent(error: e.message!));
     }
   }
+  void updateApprovalStatus(String sid, String oid, String approvalStatus) {
+    emit(UpdatingSiteOrderState());
+    try {
+      FirebaseFirestore.instance
+          .collection('sites')
+          .doc(sid)
+          .collection('orders')
+          .doc(oid)
+          .update({'approvalStatus': approvalStatus});
+      emit(CompleteUpdatingSiteOrderState());
+    } catch (e) {
+      emit(FailedUpdatingSiteOrderState(error: e.toString()));
+    }
+  }
 
   addOrderQuantity(String sid, String oid, double quantity) async {
     try {
@@ -193,6 +208,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       double quantity,
       String status,
       double rate,
+      String approvalStatus,
       String unit) async {
     try {
       add(UpdatingSiteOrderEvent());
@@ -203,6 +219,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           .doc(oid);
       await ordersDoc.update({
         "itemname": itemname,
+        'approvalStatus':approvalStatus,
         "brandname": itembrand,
         "suppliername": suppliername,
         "quantity": quantity,
@@ -224,6 +241,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           "sid": sid,
           "skid": oid,
           "itemname": itemname,
+          'approvalStatus':approvalStatus,
           "brandname": itembrand,
           "suppliername": suppliername,
           "quantity": quantity,

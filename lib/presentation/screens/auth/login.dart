@@ -27,9 +27,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   TextEditingController usernameController =
-      TextEditingController(text: "nishan@admin.com");
+      TextEditingController(text: "testengineer1@gmail.com");
   TextEditingController passwordController =
-      TextEditingController(text: "nishan@admin.com");
+      TextEditingController(text: "testengineer1@gmail.com");
   final GlobalKey<FormState> _formkey = GlobalKey();
   bool _rememberMe = false;
 

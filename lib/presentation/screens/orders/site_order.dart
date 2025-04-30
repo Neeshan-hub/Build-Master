@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/fluent_mdl2.dart';
 import 'package:iconify_flutter/icons/zondicons.dart';
-// import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../../bloc/dropdown/dropdown_bloc.dart';
 import '../../../bloc/orders/orders_bloc.dart';
@@ -38,6 +37,7 @@ class _OrderPageState extends State<OrderPage> {
   List<dynamic> selectStatus = ["Delivered", "On The Way", "Cancelled"];
   String orderstatus = '';
   int i = 1;
+
   @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> data = [];
@@ -46,13 +46,13 @@ class _OrderPageState extends State<OrderPage> {
 
     final Map<String, dynamic> args =
     ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
     showAddOrderModal() {
       return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             content: Form(
               key: _formKey,
               child: SizedBox(
@@ -60,9 +60,7 @@ class _OrderPageState extends State<OrderPage> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      SizedBox(
-                        height: size.height / 90 * 1.338,
-                      ),
+                      SizedBox(height: size.height / 90 * 1.338),
                       Text(
                         "Add Orders",
                         style: TextStyle(
@@ -70,36 +68,28 @@ class _OrderPageState extends State<OrderPage> {
                             fontWeight: FontWeight.w600,
                             color: AppColors.blue),
                       ),
-                      SizedBox(
-                        height: size.height / 90 * 2.538,
-                      ),
+                      SizedBox(height: size.height / 90 * 2.538),
                       CustomTextField(
                         controller: _itemname,
                         hintText: "Item Name",
                         size: size.height / 90 * 5.44,
                         width: size.width,
                       ).customTextField(),
-                      SizedBox(
-                        height: size.height / 90 * 1.538,
-                      ),
+                      SizedBox(height: size.height / 90 * 1.538),
                       CustomTextField(
                         controller: _brandname,
                         hintText: "Brand Name",
                         size: size.height / 90 * 5.44,
                         width: size.width,
                       ).customTextField(),
-                      SizedBox(
-                        height: size.height / 90 * 1.538,
-                      ),
+                      SizedBox(height: size.height / 90 * 1.538),
                       CustomTextField(
                         controller: _suppliername,
                         hintText: "Supplier Name",
                         size: size.height / 90 * 5.44,
                         width: size.width,
                       ).customTextField(),
-                      SizedBox(
-                        height: size.height / 90 * 1.538,
-                      ),
+                      SizedBox(height: size.height / 90 * 1.538),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -122,9 +112,7 @@ class _OrderPageState extends State<OrderPage> {
                           ),
                         ],
                       ),
-                      SizedBox(
-                        height: size.height / 90 * 1.538,
-                      ),
+                      SizedBox(height: size.height / 90 * 1.538),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -147,18 +135,14 @@ class _OrderPageState extends State<OrderPage> {
                           ),
                         ],
                       ),
-                      SizedBox(
-                        height: size.height / 90 * 2.334,
-                      ),
+                      SizedBox(height: size.height / 90 * 2.334),
                       CustomTextField(
                         controller: _unit,
                         hintText: "Unit",
                         size: size.height / 90 * 5.44,
                         width: size.width,
                       ).customTextField(),
-                      SizedBox(
-                        height: size.height / 90 * 1.838,
-                      ),
+                      SizedBox(height: size.height / 90 * 1.838),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -166,8 +150,7 @@ class _OrderPageState extends State<OrderPage> {
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.symmetric(
                                   horizontal: 24, vertical: 15),
-                              minimumSize: Size(size.width / 4,
-                                  size.height / 16), // Increased button size
+                              minimumSize: Size(size.width / 4, size.height / 16),
                               foregroundColor: AppColors.blue,
                             ),
                             onPressed: () {
@@ -176,7 +159,7 @@ class _OrderPageState extends State<OrderPage> {
                             child: const Text(
                               "Cancel",
                               style: TextStyle(
-                                fontSize: 15, // Increased font size
+                                fontSize: 15,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -223,6 +206,7 @@ class _OrderPageState extends State<OrderPage> {
                                       rate: double.parse(_rate.text),
                                       status: orderstatus,
                                       unit: _unit.text,
+                                      approvalStatus: 'Pending',
                                     );
                                     BlocProvider.of<OrdersBloc>(context)
                                         .addOrder(orderModel, args['sid']);
@@ -358,6 +342,117 @@ class _OrderPageState extends State<OrderPage> {
           });
     }
 
+    showApprovalDialog(String oid, String sid, bool approve) {
+      return showDialog(
+          context: context,
+          builder: (context) {
+            final size = MediaQuery.of(context).size;
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              content: SizedBox(
+                width: size.width,
+                height: size.height / 90 * 21,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CircleAvatar(
+                      radius: size.width / 9.2,
+                      backgroundColor: approve ? AppColors.green : AppColors.red,
+                      child: Iconify(
+                        approve ? FluentMdl2.accept : FluentMdl2.cancel,
+                        size: size.height / 90 * 4.76,
+                        color: AppColors.white,
+                      ),
+                    ),
+                    Text(
+                      "Are you sure you want to ${approve ? 'Approve' : 'Disapprove'} this order?",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            fixedSize: const Size(103, 33),
+                            backgroundColor: AppColors.white,
+                            foregroundColor: AppColors.blue,
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        BlocConsumer<OrdersBloc, OrdersState>(
+                          listener: (context, state) {
+                            if (state is UpdatingSiteOrderState) {
+                              BotToast.showCustomLoading(
+                                toastBuilder: (context) => customLoading(size),
+                              );
+                            }
+                            if (state is CompleteUpdatingSiteOrderState) {
+                              BotToast.closeAllLoading();
+                              Navigator.of(context).pop();
+                              BotToast.showText(
+                                text: "Order ${approve ? 'Approved' : 'Disapproved'}",
+                                contentColor: AppColors.green,
+                              );
+                            }
+                            if (state is FailedUpdatingSiteOrderState) {
+                              BotToast.closeAllLoading();
+                              Navigator.of(context).pop();
+                              BotToast.showText(
+                                text: state.error!,
+                                contentColor: AppColors.red,
+                              );
+                            }
+                          },
+                          builder: (context, state) {
+                            return ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                elevation: 0,
+                                fixedSize: const Size(103, 33),
+                                backgroundColor: approve ? AppColors.green : AppColors.red,
+                                foregroundColor: AppColors.white,
+                              ),
+                              onPressed: () {
+                                BlocProvider.of<OrdersBloc>(context).updateApprovalStatus(
+                                  sid,
+                                  oid,
+                                  approve ? 'Approved' : 'Disapproved',
+                                );
+                              },
+                              child: Text(
+                                approve ? "Approve" : "Disapprove",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+    }
+
     showEditSiteOrderModal({
       required String sid,
       required String oid,
@@ -368,6 +463,7 @@ class _OrderPageState extends State<OrderPage> {
       required String status,
       required String unit,
       required double rate,
+      required String approvalStatus,
     }) {
       return showDialog(
         context: context,
@@ -380,9 +476,7 @@ class _OrderPageState extends State<OrderPage> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: size.height / 90 * 1.338,
-                    ),
+                    SizedBox(height: size.height / 90 * 1.338),
                     Text(
                       "Update Site Orders Info",
                       style: TextStyle(
@@ -391,9 +485,7 @@ class _OrderPageState extends State<OrderPage> {
                         color: AppColors.blue,
                       ),
                     ),
-                    SizedBox(
-                      height: size.height / 90 * 1.538,
-                    ),
+                    SizedBox(height: size.height / 90 * 1.538),
                     Container(
                       height: size.height / 90 * 5.44,
                       width: size.width,
@@ -426,9 +518,7 @@ class _OrderPageState extends State<OrderPage> {
                         },
                       ),
                     ),
-                    SizedBox(
-                      height: size.height / 90 * 1.538,
-                    ),
+                    SizedBox(height: size.height / 90 * 1.538),
                     Container(
                       height: size.height / 90 * 5.44,
                       width: size.width,
@@ -461,9 +551,7 @@ class _OrderPageState extends State<OrderPage> {
                         },
                       ),
                     ),
-                    SizedBox(
-                      height: size.height / 90 * 1.538,
-                    ),
+                    SizedBox(height: size.height / 90 * 1.538),
                     Container(
                       height: size.height / 90 * 5.44,
                       width: size.width,
@@ -496,9 +584,7 @@ class _OrderPageState extends State<OrderPage> {
                         },
                       ),
                     ),
-                    SizedBox(
-                      height: size.height / 90 * 1.538,
-                    ),
+                    SizedBox(height: size.height / 90 * 1.538),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -545,9 +631,7 @@ class _OrderPageState extends State<OrderPage> {
                         ),
                       ],
                     ),
-                    SizedBox(
-                      height: size.height / 90 * 1.538,
-                    ),
+                    SizedBox(height: size.height / 90 * 1.538),
                     BlocConsumer<DropdownBloc, DropdownState>(
                       listener: (context, state) {
                         if (state is DropdownUserSelectState) {
@@ -584,9 +668,7 @@ class _OrderPageState extends State<OrderPage> {
                         );
                       },
                     ),
-                    SizedBox(
-                      height: size.height / 90 * 1.538,
-                    ),
+                    SizedBox(height: size.height / 90 * 1.538),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -633,9 +715,7 @@ class _OrderPageState extends State<OrderPage> {
                         ),
                       ],
                     ),
-                    SizedBox(
-                      height: size.height / 90 * 2.538,
-                    ),
+                    SizedBox(height: size.height / 90 * 2.538),
                     Container(
                       height: size.height / 90 * 5.44,
                       width: size.width,
@@ -668,9 +748,7 @@ class _OrderPageState extends State<OrderPage> {
                         },
                       ),
                     ),
-                    SizedBox(
-                      height: size.height / 90 * 3.538,
-                    ),
+                    SizedBox(height: size.height / 90 * 3.538),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -737,6 +815,7 @@ class _OrderPageState extends State<OrderPage> {
                                     orderstatus,
                                     rate,
                                     unit,
+                                    approvalStatus,
                                   );
                                 }
                               },
@@ -888,16 +967,15 @@ class _OrderPageState extends State<OrderPage> {
           action: [
             IconButton(
               onPressed: () {
-                if ( args['role'] != 'Engineer') {
+                if (args['role'] != 'Engineer') {
                   BotToast.showText(
                     text: "Only Engineers can request stock",
                     contentColor: AppColors.red,
-                    duration:  const Duration(seconds: 3),
+                    duration: const Duration(seconds: 3),
                   );
                   return;
-                }
-                else{                showAddOrderModal();
-
+                } else {
+                  showAddOrderModal();
                 }
               },
               icon: CircleAvatar(
@@ -922,9 +1000,7 @@ class _OrderPageState extends State<OrderPage> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return snapshot.data!.docs.isEmpty
-                ? const Center(
-              child: Text("No Orders at the Moment"),
-            )
+                ? const Center(child: Text("No Orders at the Moment"))
                 : SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
               child: Column(
@@ -946,9 +1022,7 @@ class _OrderPageState extends State<OrderPage> {
                             border: InputBorder.none,
                             prefixIcon: Padding(
                               padding: EdgeInsets.all(padding.top * 0.3),
-                              child: const Iconify(
-                                FluentMdl2.search,
-                              ),
+                              child: const Iconify(FluentMdl2.search),
                             ),
                           ),
                         ),
@@ -975,10 +1049,11 @@ class _OrderPageState extends State<OrderPage> {
                                 "unit": snapshot.data!.docs[i]['unit'],
                                 "quantity": snapshot.data!.docs[i]
                                 ['quantity'],
-                                "status": snapshot.data!.docs[i]
-                                ['status'],
+                                "status": snapshot.data!.docs[i]['status'],
                                 "rate": snapshot.data!.docs[i]['rate'],
                                 "amount": amount,
+                                "approvalStatus": snapshot.data!.docs[i]
+                                ['approvalStatus'],
                               });
                             }
                           }
@@ -998,8 +1073,7 @@ class _OrderPageState extends State<OrderPage> {
                                 "count": 9,
                                 "data": data,
                                 "total": total,
-                                "name":
-                                "Order Invoice ${data[0]['sitename']}"
+                                "name": "Order Invoice ${data[0]['sitename']}"
                               },
                             );
                           }
@@ -1022,7 +1096,7 @@ class _OrderPageState extends State<OrderPage> {
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
                         return CustomBox(
-                          height: size.height / 90 * 16,
+                          height: size.height / 90 * 15,
                           width: size.width,
                           radius: 15,
                           blurRadius: 4.0,
@@ -1037,7 +1111,7 @@ class _OrderPageState extends State<OrderPage> {
                                 snapshot.data!.docs[index]['sid'],
                               );
                             },
-                            child: Stack(
+                            child: Row(
                               children: [
                                 Container(
                                   height: size.height,
@@ -1050,8 +1124,7 @@ class _OrderPageState extends State<OrderPage> {
                                     MainAxisAlignment.spaceBetween,
                                     children: [
                                       SizedBox(
-                                        height: size.height / 90 * 0.3,
-                                      ),
+                                          height: size.height / 90 * 0.3),
                                       Text(
                                         snapshot.data!.docs[index]
                                         ['itemname'],
@@ -1063,8 +1136,7 @@ class _OrderPageState extends State<OrderPage> {
                                       ),
                                       Row(
                                         mainAxisAlignment:
-                                        MainAxisAlignment
-                                            .spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                         children: [
                                           SizedBox(
                                             width: size.width / 7 * 2.6,
@@ -1078,89 +1150,44 @@ class _OrderPageState extends State<OrderPage> {
                                               ),
                                             ),
                                           ),
-                                          // Container(
-                                          //   margin: EdgeInsets.symmetric(
-                                          //     vertical: padding.top * 0.4,
+                                          // CustomBox(
+                                          //   height:
+                                          //   size.height / 80 * 2.44,
+                                          //   width: size.width / 3.16,
+                                          //   radius: 15,
+                                          //   blurRadius: 4.0,
+                                          //   shadowColor:
+                                          //   AppColors.customWhite,
+                                          //   color: snapshot
+                                          //       .data!
+                                          //       .docs[index]
+                                          //   ['status'] ==
+                                          //       "Cancelled"
+                                          //       ? AppColors.red
+                                          //       : snapshot.data!.docs[index]
+                                          //   ['status'] ==
+                                          //       "Delivered"
+                                          //       ? AppColors.green
+                                          //       : const Color.fromARGB(
+                                          //       255, 164, 88, 6),
+                                          //   horizontalMargin: 0,
+                                          //   verticalMargin: 0,
+                                          //   child: Center(
+                                          //     child: Text(
+                                          //       snapshot.data!.docs[index]
+                                          //       ['status'],
+                                          //       style: TextStyle(
+                                          //           color:
+                                          //           AppColors.white),
+                                          //     ),
                                           //   ),
-                                          //   child: args['role'] ==
-                                          //               "Supervisor" ||
-                                          //           args['role'] ==
-                                          //               "Admin"
-                                          //       ? ToggleSwitch(
-                                          //           minWidth: 30.0,
-                                          //           minHeight: 30,
-                                          //           initialLabelIndex: 1,
-                                          //           cornerRadius: 20.0,
-                                          //           activeFgColor:
-                                          //               Colors.white,
-                                          //           inactiveBgColor:
-                                          //               Colors.grey,
-                                          //           inactiveFgColor:
-                                          //               Colors.white,
-                                          //           totalSwitches: 2,
-                                          //           icons: const [
-                                          //             Icons.check,
-                                          //             Icons.close,
-                                          //           ],
-                                          //           activeBgColors: [
-                                          //             [AppColors.green],
-                                          //             [AppColors.red],
-                                          //           ],
-                                          //           onToggle: (index) {
-                                          //             i = index!;
-                                          //           },
-                                          //         )
-                                          //       : SizedBox(),
-                                          // ),
-                                          CustomBox(
-                                            height:
-                                            size.height / 80 * 2.44,
-                                            width: size.width / 3.16,
-                                            radius: 15,
-                                            blurRadius: 4.0,
-                                            shadowColor:
-                                            AppColors.customWhite,
-                                            color: snapshot.data!
-                                                .docs[index]
-                                            ['status'] ==
-                                                "Cancelled"
-                                                ? AppColors.red
-                                                : snapshot.data!.docs[
-                                            index]
-                                            ['status'] ==
-                                                "Delivered"
-                                                ? AppColors.green
-                                                : const Color
-                                                .fromARGB(
-                                                255, 164, 88, 6),
-                                            horizontalMargin: 0,
-                                            verticalMargin: 0,
-                                            child: Center(
-                                              child: Text(
-                                                snapshot.data!.docs[index]
-                                                ['status'],
-                                                style: TextStyle(
-                                                    color:
-                                                    AppColors.white),
-                                              ),
-                                            ),
-                                          ).customBox(),
+                                          // ).customBox(),
                                         ],
                                       ),
+
+
                                       Row(
                                         children: [
-                                          SizedBox(
-                                            width: size.width / 8 * 3.8,
-                                            child: const Text(
-                                              "Quantities : ",
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight:
-                                                FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          const Spacer(),
                                           SizedBox(
                                             width: size.width / 6 * 1.8,
                                             child: Text(
@@ -1174,89 +1201,161 @@ class _OrderPageState extends State<OrderPage> {
                                               ),
                                             ),
                                           ),
-                                          const Spacer(),
                                         ],
                                       ),
                                       SizedBox(
-                                        height: size.height / 90 * 0.1,
-                                      ),
+                                          height: size.height / 90 * 0.1),
                                     ],
                                   ),
                                 ),
-                                Column(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    i == 0
-                                        ? Align(
-                                      alignment:
-                                      Alignment.centerRight,
-                                      child: IconButton(
-                                        onPressed: () {
-                                          showDeleteDialog(
-                                            snapshot.data!
-                                                .docs[index]['oid'],
-                                            snapshot.data!
-                                                .docs[index]['sid'],
-                                          );
-                                        },
-                                        icon: Iconify(
-                                          Zondicons.trash,
-                                          color: AppColors.red,
-                                          size: size.height /
-                                              90 *
-                                              2.1,
+                                Flexible(
+                                  child: Column(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                  
+                                           Align(
+                                        alignment:
+                                        Alignment.centerRight,
+                                        child: IconButton(
+                                          onPressed: () {
+                                            showDeleteDialog(
+                                              snapshot.data!
+                                                  .docs[index]['oid'],
+                                              snapshot.data!
+                                                  .docs[index]['sid'],
+                                            );
+                                          },
+                                          icon: Iconify(
+                                            Zondicons.trash,
+                                            color: AppColors.red,
+                                            size: size.height /
+                                                90 *
+                                                2.1,
+                                          ),
                                         ),
                                       ),
-                                    )
-                                        : Container(),
-                                    i == 0
-                                        ? Align(
-                                      alignment:
-                                      Alignment.centerRight,
-                                      child: IconButton(
-                                        onPressed: () {
-                                          showEditSiteOrderModal(
-                                            sid: snapshot.data!
-                                                .docs[index]['sid'],
-                                            oid: snapshot.data!
-                                                .docs[index]['oid'],
-                                            itemname: snapshot.data!
-                                                .docs[index]
-                                            ['itemname'],
-                                            suppliername: snapshot
-                                                .data!
-                                                .docs[index]
-                                            ['suppliername'],
-                                            itembrand: snapshot
-                                                .data!
-                                                .docs[index]
-                                            ['brandname'],
-                                            quantity: snapshot.data!
-                                                .docs[index]
-                                            ['quantity'],
-                                            status: snapshot.data!
-                                                .docs[index]
-                                            ['status'],
-                                            unit: snapshot.data!
-                                                .docs[index]
-                                            ['unit'],
-                                            rate: snapshot.data!
-                                                .docs[index]
-                                            ['rate'],
-                                          );
-                                        },
-                                        icon: Iconify(
-                                          FluentMdl2.edit,
-                                          color: AppColors.grey,
-                                          size: size.height /
-                                              90 *
-                                              2.1,
+                                      CustomBox(
+                                        height: size.height / 80 * 2.44,
+                                        width: size.width / 3.16,
+                                        radius: 15,
+                                        blurRadius: 4.0,
+                                        shadowColor: AppColors.customWhite,
+                                        color: snapshot.data!.docs[index].data().containsKey('approvalStatus') &&
+                                            snapshot.data!.docs[index]['approvalStatus'] == "Approved"
+                                            ? AppColors.green
+                                            : snapshot.data!.docs[index].data().containsKey('approvalStatus') &&
+                                            snapshot.data!.docs[index]['approvalStatus'] == "Disapproved"
+                                            ? AppColors.red
+                                            : Colors.orange, // Default to Pending
+                                        horizontalMargin: 0,
+                                        verticalMargin: 0,
+                                        child: Center(
+                                          child: Text(
+                                            snapshot.data!.docs[index].data().containsKey('approvalStatus')
+                                                ? snapshot.data!.docs[index]['approvalStatus']
+                                                : 'Pending',
+                                            style: TextStyle(color: AppColors.white),
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                        : Container(),
-                                  ],
+                                      ).customBox(),
+                                  
+                                      // Align(
+                                     //    alignment:
+                                     //    Alignment.centerRight,
+                                     //    child: IconButton(
+                                     //      onPressed: () {
+                                     //        showEditSiteOrderModal(
+                                     //          sid: snapshot.data!
+                                     //              .docs[index]['sid'],
+                                     //          oid: snapshot.data!
+                                     //              .docs[index]['oid'],
+                                     //          itemname: snapshot.data!
+                                     //              .docs[index]
+                                     //          ['itemname'],
+                                     //          suppliername: snapshot
+                                     //              .data!
+                                     //              .docs[index]
+                                     //          ['suppliername'],
+                                     //          itembrand: snapshot.data!
+                                     //              .docs[index]
+                                     //          ['brandname'],
+                                     //          quantity: snapshot.data!
+                                     //              .docs[index]
+                                     //          ['quantity'],
+                                     //          status: snapshot.data!
+                                     //              .docs[index]
+                                     //          ['status'],
+                                     //          unit: snapshot.data!
+                                     //              .docs[index]
+                                     //          ['unit'],
+                                     //          rate: snapshot.data!
+                                     //              .docs[index]
+                                     //          ['rate'],
+                                     //          approvalStatus: snapshot
+                                     //              .data!
+                                     //              .docs[index]
+                                     //          ['approvalStatus'],
+                                     //        );
+                                     //      },
+                                     //      icon: Iconify(
+                                     //        FluentMdl2.edit,
+                                     //        color: AppColors.grey,
+                                     //        size: size.height /
+                                     //            90 *
+                                     //            2.1,
+                                     //      ),
+                                     //    ),
+                                     //  ),
+                                      if (
+                                          (args['role'] == 'Supervisor' ||
+                                              args['role'] == 'Admin') )
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                onPressed: () {
+                                                  showApprovalDialog(
+                                                      snapshot.data!
+                                                          .docs[index]['oid'],
+                                                      snapshot.data!.docs[index]
+                                                      ['sid'],
+                                                      true);
+                                                },
+                                                icon: Iconify(
+                                                  FluentMdl2.accept,
+                                                  color: AppColors.green,
+                                                  size:
+                                                  size.height / 90 * 2.1,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
+                                                  showApprovalDialog(
+                                                      snapshot.data!
+                                                          .docs[index]['oid'],
+                                                      snapshot.data!.docs[index]
+                                                      ['sid'],
+                                                      false);
+                                                },
+                                                icon: Iconify(
+                                                  FluentMdl2.cancel,
+                                                  color: AppColors.red,
+                                                  size:
+                                                  size.height / 90 * 2.1,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      if(args['role'] == 'Engineer')
+                                        Text("Contact Supervisor to approve requests")
+                                  
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -1280,4 +1379,3 @@ class _OrderPageState extends State<OrderPage> {
     );
   }
 }
-

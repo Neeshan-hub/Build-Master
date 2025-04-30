@@ -4,6 +4,7 @@ class OrderModel {
   final String suppliername;
   final double quantity;
   String? status;
+  String? approvalStatus;
   final double rate;
   final String unit;
 
@@ -14,6 +15,6 @@ class OrderModel {
     required this.quantity,
     this.status,
     required this.rate,
-    required this.unit,
+    required this.unit, required String approvalStatus,
   });
 }
