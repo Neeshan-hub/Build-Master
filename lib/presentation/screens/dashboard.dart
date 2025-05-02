@@ -21,6 +21,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -97,6 +98,8 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+
+
 
   Widget _buildAppBarBackground(Size size, String role) {
     return Container(

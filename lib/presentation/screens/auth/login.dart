@@ -26,17 +26,17 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
   }
   //
-  // TextEditingController usernameController =
-  //     TextEditingController(text: "testsupervisor1@gmail.com");
-  // TextEditingController passwordController =
-  //     TextEditingController(text: "testsupervisor1@gmail.com");
-
   TextEditingController usernameController =
-      TextEditingController(text: "testengineer1@gmail.com");
+      TextEditingController(text: "testsupervisor1@gmail.com");
   TextEditingController passwordController =
-      TextEditingController(text: "testengineer1@gmail.com");
+      TextEditingController(text: "testsupervisor1@gmail.com");
 
+  // TextEditingController usernameController =
+  //     TextEditingController(text: "testengineer1@gmail.com");
+  // TextEditingController passwordController =
+  //     TextEditingController(text: "testengineer1@gmail.com");
 
+  //
   // TextEditingController usernameController =
   // TextEditingController(text: "nishan@admin.com");
   // TextEditingController passwordController =

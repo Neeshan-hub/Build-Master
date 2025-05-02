@@ -652,6 +652,14 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                   ),
                                 ),
                               ),
+                              Text(
+                                "Supervisor: ${snapshot.data?['supervisor']}",
+                                style: TextStyle(
+                                  color: AppColors.blue,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                ),
+                              ),
                               SizedBox(
                                 height: size.height / 90 * 2.8,
                               ),
