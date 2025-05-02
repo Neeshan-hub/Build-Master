@@ -676,6 +676,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                           "sitedesc": args['sitedesc'],
                                           "sitelocation": args['sitelocation'],
                                           "clientname": args['clientname'],
+                                          "role": args['role'],
                                           "phone": args['phone'],
                                           "supervisor": args['role']
                                         });

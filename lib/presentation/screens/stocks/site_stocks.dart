@@ -840,7 +840,8 @@ class _SiteStocksState extends State<SiteStocks> {
           action: [
             IconButton(
               onPressed: () {
-                showAddStockModal();
+                print(args.toString());
+               // showAddStockModal();
               },
               icon: CircleAvatar(
                 backgroundColor: AppColors.blue,
@@ -873,8 +874,7 @@ class _SiteStocksState extends State<SiteStocks> {
                         Row(
                           children: [
                             GestureDetector(
-                              onTap: () => searchFocusNode
-                                  .unfocus(), // Close search bar when tapping outside
+                              onTap: () => searchFocusNode.unfocus(), // Close search bar when tapping outside
                               child: CustomBox(
                                 height: size.height / 90 * 6,
                                 width: size.width / 8 * 5.8,
@@ -884,12 +884,38 @@ class _SiteStocksState extends State<SiteStocks> {
                                 color: AppColors.white,
                                 horizontalMargin: padding.top * 0.4,
                                 verticalMargin: padding.top * 0.2,
-                                child: // In the build method of _SiteStocksState, update the StockSearchBar widget:
-                                    StockSearchBar(
+                                child: StockSearchBar(
                                   siteId: args['sid'],
                                   focusNode: searchFocusNode,
-                                  onStockSelected:
-                                      showEditSiteModal, // Pass the edit dialog function as callback
+                                  onStockSelected: ({
+                                    required String itembrand,
+                                    required String itemname,
+                                    required double quantity,
+                                    required double rate,
+                                    required String sid,
+                                    required String skid,
+                                    required String suppliername,
+                                    required String unit,
+                                  }) {
+                                    if (args['role'] == 'Supervisor' || args['role'] == 'Admin') {
+                                      showEditSiteModal(
+                                        sid: sid,
+                                        skid: skid,
+                                        itemname: itemname,
+                                        suppliername: suppliername,
+                                        itembrand: itembrand,
+                                        quantity: quantity,
+                                        unit: unit,
+                                        rate: rate,
+                                      );
+                                    } else {
+                                      BotToast.showText(
+                                        text: "Only Supervisors or Admins can edit stock",
+                                        contentColor: AppColors.red,
+                                        duration: const Duration(seconds: 3),
+                                      );
+                                    }
+                                  },
                                 ),
                               ).customBox(),
                             ),
@@ -1128,11 +1154,15 @@ class _SiteStocksState extends State<SiteStocks> {
                                               ),
                                             ),
                                           ),
+                                          if (
+                                          (args['role'] == 'Supervisor' ||
+                                              args['role'] == 'Admin') )
                                           Align(
                                             alignment: Alignment.centerRight,
                                             child: IconButton(
                                               onPressed: () {
                                                 showEditSiteModal(
+
                                                   sid: snapshot
                                                       .data!.docs[index]['sid'],
                                                   skid: snapshot.data!

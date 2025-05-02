@@ -1,49 +1,40 @@
 part of 'orders_bloc.dart';
 
-@immutable
 abstract class OrdersEvent {}
 
 class AddingSiteOrderEvent extends OrdersEvent {}
-
 class CompletedAddingSiteOrderEvent extends OrdersEvent {}
-
 class FailedSiteOrderEvent extends OrdersEvent {
-  final String? error;
-  FailedSiteOrderEvent({this.error});
+  final String error;
+  FailedSiteOrderEvent({required this.error});
 }
-
-class UpdatingOrderQuantityEvent extends OrdersEvent {}
-
 class CompleteUpdatingOrderQuantityEvent extends OrdersEvent {}
-
+class UpdatingOrderQuantityEvent extends OrdersEvent {}
 class FailedUpdatingOrderQuantityEvent extends OrdersEvent {
-  final String? error;
-  FailedUpdatingOrderQuantityEvent({this.error});
+  final String error;
+  FailedUpdatingOrderQuantityEvent({required this.error});
 }
-
-class DeletingOrderEvent extends OrdersEvent {}
-
-class CompleteDeletingOrderEvent extends OrdersEvent {}
-
 class FailedDeletingOrderEvent extends OrdersEvent {
-  final String? error;
-  FailedDeletingOrderEvent({this.error});
+  final String error;
+  FailedDeletingOrderEvent({required this.error});
 }
-
-class UpdatingSiteOrderEvent extends OrdersEvent {}
-
+class DeletingOrderEvent extends OrdersEvent {}
+class CompleteDeletingOrderEvent extends OrdersEvent {}
 class CompleteUpdatingSiteOrderEvent extends OrdersEvent {}
-
+class UpdatingSiteOrderEvent extends OrdersEvent {}
 class FailedUpdatingSiteOrderEvent extends OrdersEvent {
-  final String? error;
-  FailedUpdatingSiteOrderEvent({this.error});
+  final String error;
+  FailedUpdatingSiteOrderEvent({required this.error});
 }
-
-class UpdatingQuantityEvent extends OrdersEvent {}
-
 class CompleteUpdatingQuantityEvent extends OrdersEvent {}
-
+class UpdatingQuantityEvent extends OrdersEvent {}
 class FailedUpdatingQuantityEvent extends OrdersEvent {
-  final String? error;
-  FailedUpdatingQuantityEvent({this.error});
+  final String error;
+  FailedUpdatingQuantityEvent({required this.error});
+}
+class AddingSiteStockEvent extends OrdersEvent {}
+class CompletedAddingSiteStockEvent extends OrdersEvent {}
+class FailedSiteStockEvent extends OrdersEvent {
+  final String error;
+  FailedSiteStockEvent({required this.error});
 }

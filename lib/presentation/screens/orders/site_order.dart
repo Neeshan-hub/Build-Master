@@ -397,24 +397,26 @@ class _OrderPageState extends State<OrderPage> {
                         ),
                         BlocConsumer<OrdersBloc, OrdersState>(
                           listener: (context, state) {
-                            if (state is UpdatingSiteOrderState) {
+                            if (state is UpdatingSiteOrderState || state is AddingSiteStockState) {
                               BotToast.showCustomLoading(
                                 toastBuilder: (context) => customLoading(size),
                               );
                             }
-                            if (state is CompleteUpdatingSiteOrderState) {
+                            if (state is CompleteUpdatingSiteOrderState || state is CompletedAddingSiteStockState) {
                               BotToast.closeAllLoading();
                               Navigator.of(context).pop();
                               BotToast.showText(
-                                text: "Order ${approve ? 'Approved' : 'Disapproved'}",
+                                text: approve ? "Order Approved and Added to Stock" : "Order Disapproved",
                                 contentColor: AppColors.green,
                               );
                             }
-                            if (state is FailedUpdatingSiteOrderState) {
+                            if (state is FailedUpdatingSiteOrderState || state is FailedSiteStockState) {
                               BotToast.closeAllLoading();
                               Navigator.of(context).pop();
                               BotToast.showText(
-                                text: state.error!,
+                                text: state is FailedUpdatingSiteOrderState
+                                    ? state.error
+                                    : (state as FailedSiteStockState).error,
                                 contentColor: AppColors.red,
                               );
                             }
@@ -1211,31 +1213,30 @@ class _OrderPageState extends State<OrderPage> {
                                 Flexible(
                                   child: Column(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                  
-                                           Align(
-                                        alignment:
-                                        Alignment.centerRight,
-                                        child: IconButton(
-                                          onPressed: () {
-                                            showDeleteDialog(
-                                              snapshot.data!
-                                                  .docs[index]['oid'],
-                                              snapshot.data!
-                                                  .docs[index]['sid'],
-                                            );
-                                          },
-                                          icon: Iconify(
-                                            Zondicons.trash,
-                                            color: AppColors.red,
-                                            size: size.height /
-                                                90 *
-                                                2.1,
+
+                                      // In the ListView.builder of OrderPage, replace the delete IconButton section with this
+                                      // This is inside the Flexible -> Column -> children list
+                                      if (!snapshot.data!.docs[index].data().containsKey('approvalStatus') ||
+                                          snapshot.data!.docs[index]['approvalStatus'] == "Pending")
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: IconButton(
+                                            onPressed: () {
+                                              showDeleteDialog(
+                                                snapshot.data!.docs[index]['oid'],
+                                                snapshot.data!.docs[index]['sid'],
+                                              );
+                                            },
+                                            icon: Iconify(
+                                              Zondicons.trash,
+                                              color: AppColors.red,
+                                              size: size.height / 90 * 2.1,
+                                            ),
                                           ),
                                         ),
-                                      ),
                                       CustomBox(
                                         height: size.height / 80 * 2.44,
                                         width: size.width / 3.16,

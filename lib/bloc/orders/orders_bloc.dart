@@ -1,96 +1,81 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:iconify_flutter/icons/carbon.dart';
-
 import '../../data/models/order_model.dart';
+import '../../data/models/stocks.dart';
 
 part 'orders_event.dart';
 part 'orders_state.dart';
 
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   OrdersBloc() : super(OrdersInitial()) {
-    on<OrdersEvent>((event, emit) {});
-    on<AddingSiteOrderEvent>(
-      (event, emit) {
-        emit(AddingSiteOrderState());
-      },
-    );
+    on<AddingSiteOrderEvent>((event, emit) => emit(AddingSiteOrderState()));
     on<CompletedAddingSiteOrderEvent>(
-      (event, emit) {
-        emit(CompletedAddingSiteOrderState());
-      },
-    );
+            (event, emit) => emit(CompletedAddingSiteOrderState()));
     on<FailedSiteOrderEvent>(
-      (event, emit) {
-        emit(FailedSiteOrderState(error: event.error));
-      },
-    );
+            (event, emit) => emit(FailedSiteOrderState(error: event.error)));
     on<CompleteUpdatingOrderQuantityEvent>(
-      (event, emit) {
-        emit(CompleteUpdatingOrderQuantityState());
-      },
-    );
+            (event, emit) => emit(CompleteUpdatingOrderQuantityState()));
     on<UpdatingOrderQuantityEvent>(
-      (event, emit) {
-        emit(UpdatingOrderQuantityState());
-      },
-    );
+            (event, emit) => emit(UpdatingOrderQuantityState()));
     on<FailedUpdatingOrderQuantityEvent>(
-      (event, emit) {
-        emit(FailedUpdatingOrderQuantityState(error: event.error));
-      },
-    );
+            (event, emit) => emit(FailedUpdatingOrderQuantityState(error: event.error)));
     on<FailedDeletingOrderEvent>(
-      (event, emit) {
-        emit(FailedDeletingOrderState(error: event.error));
-      },
-    );
-    on<DeletingOrderEvent>(
-      (event, emit) {
-        emit(DeletingOrderState());
-      },
-    );
+            (event, emit) => emit(FailedDeletingOrderState(error: event.error)));
+    on<DeletingOrderEvent>((event, emit) => emit(DeletingOrderState()));
     on<CompleteDeletingOrderEvent>(
-      (event, emit) {
-        emit(CompleteDeletingOrderState());
-      },
-    );
+            (event, emit) => emit(CompleteDeletingOrderState()));
     on<CompleteUpdatingSiteOrderEvent>(
-      (event, emit) {
-        emit(CompleteUpdatingSiteOrderState());
-      },
-    );
-    on<UpdatingSiteOrderEvent>(
-      (event, emit) {
-        emit(UpdatingSiteOrderState());
-      },
-    );
+            (event, emit) => emit(CompleteUpdatingSiteOrderState()));
+    on<UpdatingSiteOrderEvent>((event, emit) => emit(UpdatingSiteOrderState()));
     on<FailedUpdatingSiteOrderEvent>(
-      (event, emit) {
-        emit(FailedUpdatingSiteOrderState(error: event.error));
-      },
-    );
+            (event, emit) => emit(FailedUpdatingSiteOrderState(error: event.error)));
     on<CompleteUpdatingQuantityEvent>(
-      (event, emit) {
-        emit(CompleteUpdatingQuantityState());
-      },
-    );
-    on<UpdatingQuantityEvent>(
-      (event, emit) {
-        emit(UpdatingQuantityState());
-      },
-    );
+            (event, emit) => emit(CompleteUpdatingQuantityState()));
+    on<UpdatingQuantityEvent>((event, emit) => emit(UpdatingQuantityState()));
     on<FailedUpdatingQuantityEvent>(
-      (event, emit) {
-        emit(FailedUpdatingQuantityState(error: event.error));
-      },
-    );
+            (event, emit) => emit(FailedUpdatingQuantityState(error: event.error)));
+    on<AddingSiteStockEvent>((event, emit) => emit(AddingSiteStockState()));
+    on<CompletedAddingSiteStockEvent>(
+            (event, emit) => emit(CompletedAddingSiteStockState()));
+    on<FailedSiteStockEvent>(
+            (event, emit) => emit(FailedSiteStockState(error: event.error)));
   }
 
-  addOrder(OrderModel orderModel, String sid) async {
+  Future<void> deleteStock(String itemname, String brandname, String suppliername, String sid) async {
     try {
-      add(AddingSiteOrderEvent());
+      emit(AddingSiteStockState());
+      CollectionReference sitestock = FirebaseFirestore.instance
+          .collection("sites")
+          .doc(sid)
+          .collection("stocks");
+
+      // Find stock item
+      final existingStock = await sitestock
+          .where("itemname", isEqualTo: itemname)
+          .where("brandname", isEqualTo: brandname)
+          .where("suppliername", isEqualTo: suppliername)
+          .get();
+
+      if (existingStock.docs.isNotEmpty) {
+        // Delete stock item
+        await existingStock.docs.first.reference.delete();
+      }
+
+      await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+        "lastActivity": FieldValue.serverTimestamp(),
+      });
+
+      emit(CompletedAddingSiteStockState());
+    } on FirebaseException catch (e) {
+      emit(FailedSiteStockState(error: e.message!));
+    } catch (e) {
+      emit(FailedSiteStockState(error: e.toString()));
+    }
+  }
+  // Add an order to the orders collection
+  Future<void> addOrder(OrderModel orderModel, String sid) async {
+    try {
+      emit(AddingSiteOrderState());
       CollectionReference siteOrder = FirebaseFirestore.instance
           .collection("sites")
           .doc(sid)
@@ -104,22 +89,23 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         "suppliername": orderModel.suppliername,
         "unit": orderModel.unit,
         "quantity": orderModel.quantity,
-
         "status": "On The Way",
         "rate": orderModel.rate,
+        "approvalStatus": orderModel.approvalStatus,
       });
       await FirebaseFirestore.instance.collection("sites").doc(sid).update({
         "lastActivity": FieldValue.serverTimestamp(),
       });
-      add(CompletedAddingSiteOrderEvent());
+      emit(CompletedAddingSiteOrderState());
     } on FirebaseException catch (e) {
-      add(FailedSiteOrderEvent(error: e.message!));
+      emit(FailedSiteOrderState(error: e.message!));
     }
   }
 
-  updateOrderQuantity(String sid, double quantity, String oid) async {
+  // Update order quantity
+  Future<void> updateOrderQuantity(String sid, double quantity, String oid) async {
     try {
-      add(UpdatingOrderQuantityEvent());
+      emit(UpdatingOrderQuantityState());
       double qty = 0;
       QuerySnapshot orderdoc = await FirebaseFirestore.instance
           .collection("sites")
@@ -131,46 +117,80 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         qty = element['quantity'] - quantity;
       }
       if (qty.isNegative) {
-        add(
-          FailedUpdatingOrderQuantityEvent(
-              error: "Order used is greater than available quantity"),
-        );
+        emit(FailedUpdatingOrderQuantityState(
+            error: "Order used is greater than available quantity"));
       } else {
         DocumentReference orderdoc = FirebaseFirestore.instance
             .collection("sites")
             .doc(sid)
             .collection("orders")
             .doc(oid);
-        await orderdoc.update({
-          "quantity": qty,
-        });
+        await orderdoc.update({"quantity": qty});
         await FirebaseFirestore.instance.collection("sites").doc(sid).update({
           "lastActivity": FieldValue.serverTimestamp(),
         });
-        add(CompleteUpdatingOrderQuantityEvent());
+        emit(CompleteUpdatingOrderQuantityState());
       }
     } on FirebaseException catch (e) {
-      add(FailedUpdatingOrderQuantityEvent(error: e.message!));
+      emit(FailedUpdatingOrderQuantityState(error: e.message!));
     }
   }
-  void updateApprovalStatus(String sid, String oid, String approvalStatus) {
-    emit(UpdatingSiteOrderState());
+
+  // Update approval status and add to stock if approved
+  Future<void> updateApprovalStatus(String sid, String oid, String approvalStatus) async {
     try {
-      FirebaseFirestore.instance
+      emit(UpdatingSiteOrderState());
+      await FirebaseFirestore.instance
           .collection('sites')
           .doc(sid)
           .collection('orders')
           .doc(oid)
           .update({'approvalStatus': approvalStatus});
+
+      // Get order data
+      final orderDoc = await FirebaseFirestore.instance
+          .collection("sites")
+          .doc(sid)
+          .collection("orders")
+          .doc(oid)
+          .get();
+
+      final orderData = orderDoc.data()!;
+
+      if (approvalStatus == "Approved") {
+        final stockModel = StockModel(
+          itemname: orderData['itemname'],
+          brandname: orderData['brandname'],
+          suppliername: orderData['suppliername'],
+          unit: orderData['unit'],
+          quantity: orderData['quantity'].toDouble(),
+          rate: orderData['rate'].toDouble(),
+        );
+        await addStock(stockModel, sid);
+      } else if (approvalStatus == "Disapproved") {
+        await deleteStock(
+          orderData['itemname'],
+          orderData['brandname'],
+          orderData['suppliername'],
+          sid,
+        );
+      }
+
+      await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+        "lastActivity": FieldValue.serverTimestamp(),
+      });
+
       emit(CompleteUpdatingSiteOrderState());
+    } on FirebaseException catch (e) {
+      emit(FailedUpdatingSiteOrderState(error: e.message!));
     } catch (e) {
       emit(FailedUpdatingSiteOrderState(error: e.toString()));
     }
   }
-
-  addOrderQuantity(String sid, String oid, double quantity) async {
+  // Add order quantity
+  Future<void> addOrderQuantity(String sid, String oid, double quantity) async {
     try {
-      add(UpdatingQuantityEvent());
+      emit(UpdatingQuantityState());
       double qty = 0;
       QuerySnapshot orderDocs = await FirebaseFirestore.instance
           .collection("sites")
@@ -187,19 +207,18 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           .doc(sid)
           .collection("orders")
           .doc(oid);
-      await orderdoc.update({
-        "quantity": qty,
-      });
+      await orderdoc.update({"quantity": qty});
       await FirebaseFirestore.instance.collection("sites").doc(sid).update({
         "lastActivity": FieldValue.serverTimestamp(),
       });
-      add(CompleteUpdatingQuantityEvent());
+      emit(CompleteUpdatingQuantityState());
     } on FirebaseException catch (e) {
-      add(FailedUpdatingQuantityEvent(error: e.message!));
+      emit(FailedUpdatingQuantityState(error: e.message!));
     }
   }
 
-  updateSiteOrder(
+  // Update site order
+  Future<void> updateSiteOrder(
       String sid,
       String oid,
       String itemname,
@@ -211,7 +230,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       String approvalStatus,
       String unit) async {
     try {
-      add(UpdatingSiteOrderEvent());
+      emit(UpdatingSiteOrderState());
       DocumentReference ordersDoc = FirebaseFirestore.instance
           .collection("sites")
           .doc(sid)
@@ -219,7 +238,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           .doc(oid);
       await ordersDoc.update({
         "itemname": itemname,
-        'approvalStatus':approvalStatus,
+        'approvalStatus': approvalStatus,
         "brandname": itembrand,
         "suppliername": suppliername,
         "quantity": quantity,
@@ -227,50 +246,83 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         "unit": unit,
       });
       if (status.isNotEmpty) {
-        await ordersDoc.update({
-          "status": status,
-        });
+        await ordersDoc.update({"status": status});
       }
 
-      if (status == "Delivered") {
-        CollectionReference sitesStock = FirebaseFirestore.instance
-            .collection("sites")
-            .doc(sid)
-            .collection("stocks");
-        await sitesStock.doc(oid).set({
-          "sid": sid,
-          "skid": oid,
-          "itemname": itemname,
-          'approvalStatus':approvalStatus,
-          "brandname": itembrand,
-          "suppliername": suppliername,
-          "quantity": quantity,
-          "rate": rate,
-          "unit": unit,
-        });
-      }
       await FirebaseFirestore.instance.collection("sites").doc(sid).update({
         "lastActivity": FieldValue.serverTimestamp(),
       });
 
-      add(CompleteUpdatingSiteOrderEvent());
+      emit(CompleteUpdatingSiteOrderState());
     } on FirebaseException catch (e) {
-      add(FailedUpdatingSiteOrderEvent(error: e.message!));
+      emit(FailedUpdatingSiteOrderState(error: e.message!));
     }
   }
 
-  deleteSiteOrder(String sid, String oid) async {
+  // Delete site order
+  Future<void> deleteSiteOrder(String sid, String oid) async {
     try {
-      add(DeletingOrderEvent());
+      emit(DeletingOrderState());
       DocumentReference orders = FirebaseFirestore.instance
           .collection("sites")
           .doc(sid)
           .collection("orders")
           .doc(oid);
       await orders.delete();
-      add(CompleteDeletingOrderEvent());
+      emit(CompleteDeletingOrderState());
     } on FirebaseException catch (e) {
-      add(FailedDeletingOrderEvent(error: e.message!));
+      emit(FailedDeletingOrderState(error: e.message!));
+    }
+  }
+
+  // Add stock to the stocks collection
+  Future<void> addStock(StockModel stockModel, String sid) async {
+    try {
+      emit(AddingSiteStockState());
+      CollectionReference sitestock = FirebaseFirestore.instance
+          .collection("sites")
+          .doc(sid)
+          .collection("stocks");
+
+      // Check if stock already exists for this item
+      final existingStock = await sitestock
+          .where("itemname", isEqualTo: stockModel.itemname)
+          .where("brandname", isEqualTo: stockModel.brandname)
+          .where("suppliername", isEqualTo: stockModel.suppliername)
+          .get();
+
+      if (existingStock.docs.isNotEmpty) {
+        // Update existing stock quantity
+        final existingDoc = existingStock.docs.first;
+        await existingDoc.reference.update({
+          "quantity": existingDoc['quantity'] + stockModel.quantity,
+          "lastUpdated": FieldValue.serverTimestamp(),
+        });
+      } else {
+        // Add new stock
+        String skid = sitestock.doc().id;
+        await sitestock.doc(skid).set({
+          "sid": sid,
+          "skid": skid,
+          "itemname": stockModel.itemname,
+          "brandname": stockModel.brandname,
+          "suppliername": stockModel.suppliername,
+          "unit": stockModel.unit,
+          "quantity": stockModel.quantity,
+          "rate": stockModel.rate,
+          "lastUpdated": FieldValue.serverTimestamp(),
+        });
+      }
+
+      await FirebaseFirestore.instance.collection("sites").doc(sid).update({
+        "lastActivity": FieldValue.serverTimestamp(),
+      });
+
+      emit(CompletedAddingSiteStockState());
+    } on FirebaseException catch (e) {
+      emit(FailedSiteStockState(error: e.message!));
+    } catch (e) {
+      emit(FailedSiteStockState(error: e.toString()));
     }
   }
 }
