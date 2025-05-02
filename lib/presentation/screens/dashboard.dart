@@ -21,6 +21,17 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  Future<List<String?>> _getUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      return [docSnapshot.data()?['role'], docSnapshot.data()?['fullname']];
+    }
+    return [null, null];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,22 +40,19 @@ class _DashboardState extends State<Dashboard> {
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection("users")
-            .where("uid", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-            .snapshots(),
+      body: FutureBuilder<List<String?>>(
+        future: _getUserData(),
         builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return _buildShimmerLoading(size);
+          }
+
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          if (!snapshot.hasData) {
-            return _buildShimmerLoading(size);
-          }
-
-          final userData = snapshot.data!.docs.first;
-          final role = userData['role'] as String;
+          final role = snapshot.data?[0] ?? 'Unknown';
+          final fullname = snapshot.data?[1] ?? 'User';
 
           return Column(
             children: [
@@ -52,7 +60,7 @@ class _DashboardState extends State<Dashboard> {
                 height: size.height * 0.28,
                 child: Stack(
                   children: [
-                    _buildAppBarBackground(size, role),
+                    _buildAppBarBackground(size, role, fullname),
                     Positioned(
                       top: 40,
                       right: 20,
@@ -61,21 +69,21 @@ class _DashboardState extends State<Dashboard> {
                           _buildAppBarAction(
                             icon: role == "Admin"
                                 ? Iconify(
-                                    EmojioneMonotone.construction_worker,
-                                    color: Colors.white,
-                                  )
+                              EmojioneMonotone.construction_worker,
+                              color: Colors.white,
+                            )
                                 : const Icon(
-                                    Icons.exit_to_app,
-                                    color: Colors.white,
-                                  ),
+                              Icons.exit_to_app,
+                              color: Colors.white,
+                            ),
                             onPressed: role == "Admin"
                                 ? () =>
-                                    Navigator.pushNamed(context, settingspage)
+                                Navigator.pushNamed(context, settingspage)
                                 : () => ShowCustomModal().showSignOutDialog(
-                                      context: context,
-                                      height: size.height * 0.25,
-                                      width: size.width * 0.8,
-                                    ),
+                              context: context,
+                              height: size.height * 0.25,
+                              width: size.width * 0.8,
+                            ),
                           ),
                           _buildAppBarAction(
                             icon: Iconify(
@@ -91,7 +99,9 @@ class _DashboardState extends State<Dashboard> {
                   ],
                 ),
               ),
-              Expanded(child: _buildMainContent(size, theme, role, isDarkMode)),
+              Expanded(
+                child: _buildMainContent(size, theme, role, isDarkMode, fullname),
+              ),
             ],
           );
         },
@@ -99,9 +109,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-
-
-  Widget _buildAppBarBackground(Size size, String role) {
+  Widget _buildAppBarBackground(Size size, String role, String fullname) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -148,7 +156,7 @@ class _DashboardState extends State<Dashboard> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  FirebaseAuth.instance.currentUser!.displayName ?? "User",
+                  fullname,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -166,7 +174,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Widget _buildMainContent(
-      Size size, ThemeData theme, String role, bool isDarkMode) {
+      Size size, ThemeData theme, String role, bool isDarkMode, String fullname) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: ListView(
@@ -175,7 +183,7 @@ class _DashboardState extends State<Dashboard> {
           const SizedBox(height: 24),
           _buildSectionHeader("Recent Activities", Icons.construction),
           const SizedBox(height: 16),
-          const HorizontalSiteList(),
+          HorizontalSiteList(role: role, fullname: fullname),
         ],
       ),
     );
@@ -214,7 +222,7 @@ class _DashboardState extends State<Dashboard> {
           title: "Sites",
           icon: "assets/icons/house.png",
           countStream:
-              FirebaseFirestore.instance.collection("sites").snapshots(),
+          FirebaseFirestore.instance.collection("sites").snapshots(),
           color: AppColors.blue,
           isDarkMode: isDarkMode,
         ),
@@ -403,11 +411,11 @@ class _DashboardState extends State<Dashboard> {
                   crossAxisCount: 3,
                   children: List.generate(
                       3,
-                      (index) => Container(
-                            margin: const EdgeInsets.all(8),
-                            height: 100,
-                            color: Colors.white,
-                          )),
+                          (index) => Container(
+                        margin: const EdgeInsets.all(8),
+                        height: 100,
+                        color: Colors.white,
+                      )),
                 ),
                 const SizedBox(height: 32),
                 Container(
