@@ -14,7 +14,6 @@ import '../../data/models/stocks.dart';
 import '../../main.dart';
 
 part 'sites_event.dart';
-
 part 'sites_state.dart';
 
 class SitesBloc extends Bloc<SitesEvent, SitesState> {
@@ -59,34 +58,30 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
           (event, emit) => emit(CompleteUpdatingSiteState()),
     );
     on<FailedUpdatingSiteEvent>(
-          (event, emit) => emit(FailedUpdatingSiteState()),
+          (event, emit) => emit(FailedUpdatingSiteState(error: event.error)),
     );
     on<AddSiteEvent>(addSite);
+    on<UpdateSiteEngineersEvent>(updateSiteEngineers);
   }
 
   CollectionReference sites = FirebaseFirestore.instance.collection("sites");
-  CollectionReference notifications = FirebaseFirestore.instance.collection("notifications");
+  CollectionReference notifications =
+  FirebaseFirestore.instance.collection("notifications");
   String id = "";
 
   Future<void> addSite(AddSiteEvent event, Emitter<SitesState> emit) async {
     emit(LoadingSiteState());
     List<String> imageUrls = [];
     String id = sites.doc().id;
-    print("55");
 
     try {
       // Upload images to Firebase Storage and collect URLs
       for (var image in event.images) {
-        print('image came in');
         String? url = await _uploadSupaFile(image, id);
 
         if (url != null) {
-          print('image not null re');
-          print(url);
-
           imageUrls.add(url);
         }
-        print('image null re');
       }
       // Store site data along with image URLs in Firestore
       await sites.doc(id).set({
@@ -98,6 +93,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "phone": event.siteModel.phone,
         "supervisor": event.siteModel.supervisor,
         "imageUrls": imageUrls,
+        "engineers": [], // Initialize engineers as an empty array
         "lastActivity": FieldValue.serverTimestamp(),
       });
 
@@ -130,14 +126,10 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
 
   Future<String?> _uploadFile(XFile image, String siteId) async {
     try {
-      print('image 1 re');
-
       File file = File(image.path);
       if (!file.existsSync()) {
-        print('image 2 re');
         return null;
       }
-      print('image 3 re');
 
       String sanitizedName = image.name
           .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
@@ -148,11 +140,9 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
           .child("siteimages")
           .child(siteId)
           .child("${DateTime.now().millisecondsSinceEpoch}_$sanitizedName");
-      print('image 4 re');
 
       UploadTask uploadTask = reference.putFile(file);
       TaskSnapshot snapshot = await uploadTask;
-      print('image 6 re');
 
       if (snapshot.state == TaskState.success) {
         return await reference.getDownloadURL();
@@ -166,14 +156,10 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
 
   Future<String?> _uploadSupaFile(XFile image, String siteId) async {
     try {
-      print('image 1 re');
-
       File file = File(image.path);
       if (!file.existsSync()) {
-        print('image 2 re');
         return null;
       }
-      print('image 3 re');
 
       String sanitizedName = image.name
           .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
@@ -181,11 +167,9 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
 
       String fileName =
           "${DateTime.now().millisecondsSinceEpoch}_$siteId$sanitizedName";
-      print('image 4 re');
 
       final supabase = Supabase.instance.client;
       await supabase.storage.from('sites').upload(fileName, file);
-      print('image 6 re');
 
       return supabase.storage.from('sites').getPublicUrl(fileName);
     } catch (e) {
@@ -222,7 +206,8 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     }
   }
 
-  Future<void> deleteSite(String sid, List<String> imageurl,String sname, context) async {
+  Future<void> deleteSite(
+      String sid, List<String> imageurl, String sname, context) async {
     final size = MediaQuery.of(context).size;
     try {
       BotToast.showCustomLoading(
@@ -249,7 +234,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
       // Log notification for site deletion
       await _logNotification(
         action: "Site Deleted",
-        details: "Site '$sname ' deleted",
+        details: "Site '$sname' deleted",
         siteId: sid,
       );
 
@@ -290,23 +275,47 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "clientname": clientname,
         "phone": phone,
         "sitedesc": sitedesc,
+        "supervisor": supervisor,
         "lastActivity": FieldValue.serverTimestamp(),
       });
-
-      if (supervisor.isNotEmpty) {
-        await sites.update({"supervisor": supervisor});
-      }
 
       // Log notification for site update
       await _logNotification(
         action: "Site Updated",
-        details: "Updated site '$sitename' ",
+        details: "Updated site '$sitename'",
         siteId: sid,
       );
 
       add(CompleteUpdatingSiteEvent());
     } on FirebaseException catch (e) {
-      add(FailedUpdatingSiteEvent(error: e.message!));
+      add(FailedUpdatingSiteEvent(error: e.message));
+    }
+  }
+
+  Future<void> updateSiteEngineers(
+      UpdateSiteEngineersEvent event, Emitter<SitesState> emit) async {
+    try {
+      emit(UpdatingSiteState());
+      DocumentReference sites =
+      FirebaseFirestore.instance.collection("sites").doc(event.sid);
+
+      await sites.update({
+        "engineers": event.engineers,
+        "lastActivity": FieldValue.serverTimestamp(),
+      });
+      print('updating engineers');
+      print(event.engineers);
+
+      // Log notification for engineer assignment
+      await _logNotification(
+        action: "Engineers Assigned",
+        details: "Assigned engineers '${event.engineers.join(", ")}' to site",
+        siteId: event.sid,
+      );
+
+      emit(CompleteUpdatingSiteState());
+    } on FirebaseException catch (e) {
+      emit(FailedUpdatingSiteState(error: e.message));
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:construction/utils/routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/app_colors.dart';
@@ -11,6 +12,8 @@ class HorizontalSiteList extends StatelessWidget {
   const HorizontalSiteList({super.key, required this.role, this.fullname});
 
   Stream<QuerySnapshot> _getSitesStream() {
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.uid ?? "unknown";
     switch (role) {
       case 'Admin':
         return FirebaseFirestore.instance
@@ -26,6 +29,9 @@ class HorizontalSiteList extends StatelessWidget {
       case 'Engineer':
         return FirebaseFirestore.instance
             .collection("sites")
+            .where("engineers", arrayContainsAny: [
+          {'id':userId,'name': fullname}
+        ])
             .orderBy('lastActivity', descending: true)
             .snapshots();
       default:

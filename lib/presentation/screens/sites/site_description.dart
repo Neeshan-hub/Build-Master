@@ -5,7 +5,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:construction/presentation/includes/appbar.dart';
 import 'package:construction/utils/app_colors.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -13,11 +12,9 @@ import 'package:iconify_flutter/icons/fluent_mdl2.dart';
 import 'package:iconify_flutter/icons/zondicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../bloc/dropdown/dropdown_bloc.dart';
 import '../../../bloc/sites/sites_bloc.dart';
 import '../../../main.dart';
 import '../../../utils/routes.dart';
-import '../../../utils/validator.dart';
 import '../../includes/custom_box.dart';
 
 class SiteDescription extends StatefulWidget {
@@ -29,7 +26,8 @@ class SiteDescription extends StatefulWidget {
 
 class _SiteDescriptionState extends State<SiteDescription> {
   final _formKey = GlobalKey<FormState>();
-  String dropdownvalue = "";
+  List<String> selectedSupervisors = [];
+  List<Map<String, String>> selectedEngineers = [];
   String sid = "";
   String sitename = "";
   String sitelocation = "";
@@ -45,7 +43,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
     CarouselSliderController carouselController = CarouselSliderController();
 
     final Map<String, dynamic> args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
     showEditSiteModal({
       required String sid,
@@ -57,348 +55,335 @@ class _SiteDescriptionState extends State<SiteDescription> {
     }) {
       return showDialog(
         context: context,
-        builder: (context) => BlocListener<DropdownBloc, DropdownState>(
-          listener: (context, state) {
-            if (state is DropdownUserSelectState) {
-              dropdownvalue = state.value!;
-            }
-          },
-          child: AlertDialog(
-            content: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection("users")
-                    .where("role", isEqualTo: "Supervisor")
-                    .get()
-                    .asStream(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return SizedBox(
+        builder: (context) => AlertDialog(
+          content: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection("users")
+                  .where("role", isEqualTo: "Supervisor")
+                  .get()
+                  .asStream(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final supervisors = snapshot.data!.docs;
+                  return SizedBox(
                       width: size.width,
                       height: size.height / 90 * 53.334,
                       child: Form(
-                        key: _formKey,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: size.height / 90 * 1.338,
-                              ),
-                              Text(
-                                "Update Site Info",
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.blue),
-                              ),
-                              SizedBox(
-                                height: size.height / 90 * 2.538,
-                              ),
-                              Container(
-                                height: size.height / 90 * 5.44,
-                                width: size.width,
-                                decoration: BoxDecoration(
-                                  color: AppColors.customWhite,
-                                  borderRadius: BorderRadius.circular(10),
+                          key: _formKey,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                SizedBox(height: size.height / 90 * 1.338),
+                                Text(
+                                  "Update Site Info",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.blue),
                                 ),
-                                child: TextFormField(
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
+                                SizedBox(height: size.height / 90 * 2.538),
+                                Container(
+                                  height: size.height / 90 * 5.44,
+                                  width: size.width,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.customWhite,
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  initialValue: sitename,
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: padding.top * 0.4,
+                                  child: TextFormField(
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
                                     ),
-                                    hintText: "Site Name",
-                                    border: InputBorder.none,
-                                  ),
-                                  onChanged: (value) {
-                                    sitename = value;
-                                  },
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "Cant Send Empty value";
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: size.height / 90 * 1.538,
-                              ),
-                              Container(
-                                height: size.height / 90 * 5.44,
-                                width: size.width,
-                                decoration: BoxDecoration(
-                                  color: AppColors.customWhite,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: TextFormField(
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                  initialValue: sitelocation,
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: padding.top * 0.4,
-                                    ),
-                                    hintText: "Site Location",
-                                    border: InputBorder.none,
-                                  ),
-                                  onChanged: (value) {
-                                    sitelocation = value;
-                                  },
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "Cant Send Empty value";
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: size.height / 90 * 1.538,
-                              ),
-                              Container(
-                                height: size.height / 90 * 5.44,
-                                width: size.width,
-                                decoration: BoxDecoration(
-                                  color: AppColors.customWhite,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: TextFormField(
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                  initialValue: clientname,
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: padding.top * 0.4,
-                                    ),
-                                    hintText: "Client Name",
-                                    border: InputBorder.none,
-                                  ),
-                                  onChanged: (value) {
-                                    clientname = value;
-                                  },
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "Cant Send Empty value";
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: size.height / 90 * 1.538,
-                              ),
-                              Container(
-                                height: size.height / 90 * 5.44,
-                                width: size.width,
-                                decoration: BoxDecoration(
-                                  color: AppColors.customWhite,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: TextFormField(
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                  initialValue: phone,
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: padding.top * 0.4,
-                                    ),
-                                    hintText: "Phone",
-                                    border: InputBorder.none,
-                                  ),
-                                  onChanged: (value) {
-                                    phone = value;
-                                  },
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "Cant Send Empty value";
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: size.height / 90 * 1.538,
-                              ),
-                              Container(
-                                height: size.height / 90 * 5.44,
-                                width: size.width,
-                                decoration: BoxDecoration(
-                                  color: AppColors.customWhite,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: TextFormField(
-                                  initialValue: about,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: padding.top * 0.4,
-                                    ),
-                                    hintText: "About Site",
-                                    border: InputBorder.none,
-                                  ),
-                                  onChanged: (value) {
-                                    about = value;
-                                  },
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "Cant Send Empty value";
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: size.height / 90 * 1.538,
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.customWhite,
-                                ),
-                                child: DropdownButtonFormField2(
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                  decoration: const InputDecoration(
-                                    border: InputBorder.none,
-                                  ),
-                                  validator: (value) =>
-                                      Validator.getBlankFieldValidator(
-                                          value.toString(),
-                                          "Supervisor for site"),
-                                  isExpanded: true,
-                                  hint: const Text("Assign a Supervisior"),
-                                  items: snapshot.data!.docs
-                                      .map<DropdownMenuItem>((supervisor) {
-                                    return DropdownMenuItem(
-                                      value: "${supervisor['fullname']}",
-                                      child: Text(
-                                        "${supervisor['fullname']}",
+                                    initialValue: sitename,
+                                    decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: padding.top * 0.4,
                                       ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    BlocProvider.of<DropdownBloc>(context)
-                                        .onUserSelectDropdown(
-                                            newValue.toString());
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: size.height / 90 * 1.538,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      elevation: 0,
-                                      fixedSize: const Size(103, 33),
-                                      backgroundColor: AppColors.white,
-                                      foregroundColor: AppColors.blue,
+                                      hintText: "Site Name",
+                                      border: InputBorder.none,
                                     ),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
+                                    onChanged: (value) {
+                                      sitename = value;
                                     },
-                                    child: const Text(
-                                      "Cancel",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black,
-                                      ),
-                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Can't Send Empty value";
+                                      }
+                                      return null;
+                                    },
                                   ),
-                                  BlocConsumer<SitesBloc, SitesState>(
-                                    listener: (context, state) {
-                                      if (state is UpdatingSiteState) {
-                                        BotToast.showCustomLoading(
-                                          toastBuilder: (context) =>
-                                              customLoading(size),
-                                        );
-                                      }
-                                      if (state is CompleteUpdatingSiteState) {
-                                        BotToast.closeAllLoading();
-                                        Navigator.of(context).pop();
-                                        BotToast.showText(
-                                          text: "Site Information Updated",
-                                          contentColor: AppColors.green,
-                                        );
-                                      }
-                                      if (state is FailedUpdatingSiteState) {
-                                        BotToast.closeAllLoading();
-                                        Navigator.of(context).pop();
-                                        BotToast.showText(
-                                          text: state.error!,
-                                          contentColor: AppColors.red,
-                                        );
-                                      }
+                                ),
+                                SizedBox(height: size.height / 90 * 1.538),
+                                Container(
+                                  height: size.height / 90 * 5.44,
+                                  width: size.width,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.customWhite,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: TextFormField(
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                    initialValue: sitelocation,
+                                    decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: padding.top * 0.4,
+                                      ),
+                                      hintText: "Site Location",
+                                      border: InputBorder.none,
+                                    ),
+                                    onChanged: (value) {
+                                      sitelocation = value;
                                     },
-                                    builder: (context, state) {
-                                      return ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          elevation: 0,
-                                          fixedSize: const Size(103, 33),
-                                          backgroundColor: AppColors.yellow,
-                                          foregroundColor: AppColors.blue,
-                                        ),
-                                        onPressed: () {
-                                          BlocProvider.of<SitesBloc>(context)
-                                              .updateSiteInfo(
-                                            sid: sid,
-                                            sitename: sitename,
-                                            sitelocation: sitelocation,
-                                            clientname: clientname,
-                                            phone: phone,
-                                            sitedesc: about,
-                                            supervisor: dropdownvalue,
-                                          );
-                                        },
-                                        child: const Text(
-                                          "Update",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black,
-                                          ),
-                                        ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Can't Send Empty value";
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                SizedBox(height: size.height / 90 * 1.538),
+                                Container(
+                                  height: size.height / 90 * 5.44,
+                                  width: size.width,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.customWhite,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: TextFormField(
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                    initialValue: clientname,
+                                    decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: padding.top * 0.4,
+                                      ),
+                                      hintText: "Client Name",
+                                      border: InputBorder.none,
+                                    ),
+                                    onChanged: (value) {
+                                      clientname = value;
+                                    },
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Can't Send Empty value";
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                SizedBox(height: size.height / 90 * 1.538),
+                                Container(
+                                  height: size.height / 90 * 5.44,
+                                  width: size.width,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.customWhite,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: TextFormField(
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                    initialValue: phone,
+                                    decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: padding.top * 0.4,
+                                      ),
+                                      hintText: "Phone",
+                                      border: InputBorder.none,
+                                    ),
+                                    onChanged: (value) {
+                                      phone = value;
+                                    },
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Can't Send Empty value";
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                SizedBox(height: size.height / 90 * 1.538),
+                                Container(
+                                  height: size.height / 90 * 5.44,
+                                  width: size.width,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.customWhite,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: TextFormField(
+                                    initialValue: about,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                    decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: padding.top * 0.4,
+                                      ),
+                                      hintText: "About Site",
+                                      border: InputBorder.none,
+                                    ),
+                                    onChanged: (value) {
+                                      about = value;
+                                    },
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Can't Send Empty value";
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                                SizedBox(height: size.height / 90 * 1.538),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.customWhite,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: InkWell(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) =>
+                                            _SupervisorSelectionDialog(
+                                              supervisors: supervisors,
+                                              initialSelected: selectedSupervisors,
+                                              onConfirm: (List<String> selected) {
+                                                setState(() {
+                                                  selectedSupervisors = selected;
+                                                });
+                                              },
+                                            ),
                                       );
                                     },
+                                    child: Padding(
+                                      padding:
+                                      EdgeInsets.all(padding.top * 0.4),
+                                      child: Text(
+                                        selectedSupervisors.isEmpty
+                                            ? "Assign Supervisors"
+                                            : selectedSupervisors.join(", "),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  } else {
-                    return const Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    );
-                  }
-                }),
-          ),
+                                ),
+                                SizedBox(height: size.height / 90 * 1.538),
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceAround,
+                                  children: [
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        elevation: 0,
+                                        fixedSize: const Size(103, 33),
+                                        backgroundColor: AppColors.white,
+                                        foregroundColor: AppColors.blue,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text(
+                                        "Cancel",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                    BlocConsumer<SitesBloc, SitesState>(
+                                      listener: (context, state) {
+                                        if (state is UpdatingSiteState) {
+                                          BotToast.showCustomLoading(
+                                            toastBuilder: (context) =>
+                                                customLoading(size),
+                                          );
+                                        }
+                                        if (state
+                                        is CompleteUpdatingSiteState) {
+                                          BotToast.closeAllLoading();
+                                          Navigator.of(context).pop();
+                                          BotToast.showText(
+                                            text: "Site Information Updated",
+                                            contentColor: AppColors.green,
+                                          );
+                                        }
+                                        if (state is FailedUpdatingSiteState) {
+                                          BotToast.closeAllLoading();
+                                          Navigator.of(context).pop();
+                                          BotToast.showText(
+                                            text: state.error!,
+                                            contentColor: AppColors.red,
+                                          );
+                                        }
+                                      },
+                                      builder: (context, state) {
+                                        return ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            elevation: 0,
+                                            fixedSize: const Size(103, 33),
+                                            backgroundColor: AppColors.yellow,
+                                            foregroundColor: AppColors.blue,
+                                          ),
+                                          onPressed: () {
+                                            if (_formKey.currentState!
+                                                .validate()) {
+                                              BlocProvider.of<SitesBloc>(
+                                                  context)
+                                                  .updateSiteInfo(
+                                                sid: sid,
+                                                sitename: sitename,
+                                                sitelocation: sitelocation,
+                                                clientname: clientname,
+                                                phone: phone,
+                                                sitedesc: about,
+                                                supervisor: selectedSupervisors
+                                                    .isNotEmpty
+                                                    ? selectedSupervisors
+                                                    .join(", ")
+                                                    : "",
+                                              );
+                                            }
+                                          },
+                                          child: const Text(
+                                            "Update",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )));
+                } else {
+                  return const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  );
+                }
+              }),
         ),
       );
     }
@@ -412,26 +397,26 @@ class _SiteDescriptionState extends State<SiteDescription> {
           action: [
             args['role'] == "Admin"
                 ? IconButton(
-                    onPressed: () {
-                      showEditSiteModal(
-                        sid: sid,
-                        sitename: sitename,
-                        sitelocation: sitelocation,
-                        clientname: clientname,
-                        phone: phone,
-                        about: about,
-                      );
-                    },
-                    icon: CircleAvatar(
-                      backgroundColor: AppColors.blue,
-                      radius: size.width / 12.4,
-                      child: Iconify(
-                        FluentMdl2.edit,
-                        color: AppColors.white,
-                        size: size.height / 90 * 2.3,
-                      ),
-                    ),
-                  )
+              onPressed: () {
+                showEditSiteModal(
+                  sid: sid,
+                  sitename: sitename,
+                  sitelocation: sitelocation,
+                  clientname: clientname,
+                  phone: phone,
+                  about: about,
+                );
+              },
+              icon: CircleAvatar(
+                backgroundColor: AppColors.blue,
+                radius: size.width / 12.4,
+                child: Iconify(
+                  FluentMdl2.edit,
+                  color: AppColors.white,
+                  size: size.height / 90 * 2.3,
+                ),
+              ),
+            )
                 : Container(),
           ],
           bgcolor: AppColors.blue,
@@ -461,58 +446,56 @@ class _SiteDescriptionState extends State<SiteDescription> {
                 children: [
                   Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: padding.top * 0.8),
+                    EdgeInsets.symmetric(horizontal: padding.top * 0.8),
                     child: snapshot.data!.docs.isEmpty
                         ? Container()
                         : CarouselSlider.builder(
-                            carouselController: carouselController,
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (context, index, _) {
-                              return snapshot.data!.docs[index]['image'] == null
-                                  ? Container()
-                                  : PageView(
-                                      onPageChanged: (value) {
-                                        setState(() {
-                                          dotposition = value;
-                                        });
-                                      },
-                                      children: [
-                                        Container(
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: padding.top * 0.2,
-                                              vertical: padding.top * 0.2),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.blue,
-                                            image: DecorationImage(
-                                              image: NetworkImage(snapshot
-                                                  .data!.docs[index]['image']),
-                                              fit: BoxFit.fill,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                            },
-                            options: CarouselOptions(
-                              viewportFraction: 1.0,
-                              height: size.height / 90 * 15.5,
+                      carouselController: carouselController,
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index, _) {
+                        return snapshot.data!.docs[index]['image'] == null
+                            ? Container()
+                            : PageView(
+                          onPageChanged: (value) {
+                            setState(() {
+                              dotposition = value;
+                            });
+                          },
+                          children: [
+                            Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: padding.top * 0.2,
+                                  vertical: padding.top * 0.2),
+                              decoration: BoxDecoration(
+                                color: AppColors.blue,
+                                image: DecorationImage(
+                                  image: NetworkImage(snapshot
+                                      .data!.docs[index]['image']),
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
+                        );
+                      },
+                      options: CarouselOptions(
+                        viewportFraction: 1.0,
+                        height: size.height / 90 * 15.5,
+                      ),
+                    ),
                   ),
-                  SizedBox(
-                    height: size.height / 90 * 1.3,
-                  ),
+                  SizedBox(height: size.height / 90 * 1.3),
                   snapshot.data!.docs.isEmpty
                       ? Container()
                       : Align(
-                          alignment: Alignment.center,
-                          child: CarouselIndicator(
-                            count: snapshot.data!.docs.length,
-                            activeColor: AppColors.yellow,
-                            color: AppColors.blue,
-                            index: dotposition,
-                          ),
-                        ),
+                    alignment: Alignment.center,
+                    child: CarouselIndicator(
+                      count: snapshot.data!.docs.length,
+                      activeColor: AppColors.yellow,
+                      color: AppColors.blue,
+                      index: dotposition,
+                    ),
+                  ),
                   StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                     stream: FirebaseFirestore.instance
                         .collection("sites")
@@ -520,12 +503,21 @@ class _SiteDescriptionState extends State<SiteDescription> {
                         .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        sid = snapshot.data!['sid'];
-                        sitename = snapshot.data!['sitename'];
-                        sitelocation = snapshot.data!['sitelocation'];
-                        clientname = snapshot.data!['clientname'];
-                        phone = snapshot.data!['phone'];
-                        about = snapshot.data!['sitedesc'];
+                        final data = snapshot.data!.data() ?? {};
+                        sid = data['sid']?.toString() ?? '';
+                        sitename = data['sitename']?.toString() ?? '';
+                        sitelocation = data['sitelocation']?.toString() ?? '';
+                        clientname = data['clientname']?.toString() ?? '';
+                        phone = data['phone']?.toString() ?? '';
+                        about = data['sitedesc']?.toString() ?? '';
+                        selectedEngineers = data.containsKey('engineers')
+                            ? (data['engineers'] as List<dynamic>)
+                            .map((e) => Map<String, String>.from(e))
+                            .toList()
+                            : [];
+                        selectedSupervisors = data.containsKey('supervisor')
+                            ? (data['supervisor']?.toString().split(", ") ?? [])
+                            : [];
                         return Container(
                           height: MediaQuery.of(context).size.height,
                           padding: EdgeInsets.symmetric(
@@ -533,9 +525,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                           child: ListView(
                             shrinkWrap: true,
                             children: [
-                              SizedBox(
-                                height: size.height / 90 * 1.2,
-                              ),
+                              SizedBox(height: size.height / 90 * 1.2),
                               Align(
                                 alignment: Alignment.topLeft,
                                 child: Text(
@@ -547,12 +537,10 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                   ),
                                 ),
                               ),
-                              SizedBox(
-                                height: size.height / 90 * 1.0,
-                              ),
+                              SizedBox(height: size.height / 90 * 1.0),
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   SizedBox(
                                     width: size.width / 2 * 1.4,
@@ -573,9 +561,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                   )
                                 ],
                               ),
-                              SizedBox(
-                                height: size.height / 90 * 0.5,
-                              ),
+                              SizedBox(height: size.height / 90 * 0.5),
                               Align(
                                 alignment: Alignment.topLeft,
                                 child: Text(
@@ -587,12 +573,10 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                   ),
                                 ),
                               ),
-                              SizedBox(
-                                height: size.height / 90 * 0.5,
-                              ),
+                              SizedBox(height: size.height / 90 * 0.5),
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "+977${snapshot.data!['phone']}",
@@ -606,8 +590,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                     onTap: () async {
                                       final Uri launchUri = Uri(
                                         scheme: 'tel',
-                                        path: args[
-                                            'phone'], // Make sure args['phone'] contains the phone number
+                                        path: snapshot.data!['phone'],
                                       );
                                       if (await canLaunchUrl(launchUri)) {
                                         await launchUrl(launchUri);
@@ -623,9 +606,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                   )
                                 ],
                               ),
-                              SizedBox(
-                                height: size.height / 90 * 1.5,
-                              ),
+                              SizedBox(height: size.height / 90 * 1.5),
                               Text(
                                 "About ${snapshot.data!['sitename']}",
                                 style: TextStyle(
@@ -634,9 +615,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                   fontSize: 18,
                                 ),
                               ),
-                              SizedBox(
-                                height: size.height / 90 * 0.5,
-                              ),
+                              SizedBox(height: size.height / 90 * 0.5),
                               SizedBox(
                                 height: size.height / 90 * 6.5,
                                 child: Text(
@@ -653,22 +632,118 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                 ),
                               ),
                               Text(
-                                "Supervisor: ${snapshot.data?['supervisor']}",
+                                "Supervisors: ${selectedSupervisors.isNotEmpty ? selectedSupervisors.join(", ") : "None"}",
                                 style: TextStyle(
                                   color: AppColors.blue,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 18,
                                 ),
                               ),
-                              SizedBox(
-                                height: size.height / 90 * 2.8,
+                              SizedBox(height: size.height / 90 * 3),
+                              Text(
+                                "Assigned Engineers: ${selectedEngineers.isNotEmpty ? selectedEngineers.map((e) => e['name']).join(", ") : "None"}",
+                                style: TextStyle(
+                                  color: AppColors.blue,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18,
+                                ),
                               ),
+                              if (args['role'] == "Supervisor")
+                                StreamBuilder<QuerySnapshot>(
+                                  stream: FirebaseFirestore.instance
+                                      .collection("users")
+                                      .where("role", isEqualTo: "Engineer")
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      final engineers = snapshot.data!.docs;
+                                      return Column(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: AppColors.customWhite,
+                                              borderRadius:
+                                              BorderRadius.circular(10),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 5.0,
+                                                  vertical: 8),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        _EngineerSelectionDialog(
+                                                          engineers: engineers,
+                                                          initialSelected:
+                                                          selectedEngineers,
+                                                          onConfirm:
+                                                              (List<Map<String, String>>
+                                                          selected) {
+                                                            setState(() {
+                                                              selectedEngineers =
+                                                                  selected;
+                                                            });
+                                                            BlocProvider.of<
+                                                                SitesBloc>(
+                                                                context)
+                                                                .add(
+                                                              UpdateSiteEngineersEvent(
+                                                                sid: sid,
+                                                                engineers:
+                                                                selectedEngineers,
+                                                              ),
+                                                            );
+                                                            print(
+                                                                'the selected engineers are');
+                                                            print(selectedEngineers);
+                                                          },
+                                                        ),
+                                                  );
+                                                },
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.max,
+                                                  mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      "Add Engineers",
+                                                      style: TextStyle(
+                                                        color: AppColors.blue,
+                                                        fontWeight:
+                                                        FontWeight.w700,
+                                                        fontSize: 18,
+                                                      ),
+                                                    ),
+                                                    Icon(
+                                                      Icons.add,
+                                                      size: 20,
+                                                      color: AppColors.blue,
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      return const Center(
+                                        child: CircularProgressIndicator
+                                            .adaptive(),
+                                      );
+                                    }
+                                  },
+                                ),
+                              SizedBox(height: size.height / 90 * 2.8),
                               SizedBox(
                                 height: size.height / 90 * 24.5,
                                 child: GridView(
                                   physics: const NeverScrollableScrollPhysics(),
                                   gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                  SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
                                     mainAxisSpacing: padding.top * 0.4,
                                     crossAxisSpacing: padding.top * 0.4,
@@ -686,7 +761,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                           "clientname": args['clientname'],
                                           "role": args['role'],
                                           "phone": args['phone'],
-                                          "supervisor": args['role']
+                                          "supervisor": args['supervisor']
                                         });
                                       },
                                       child: CustomBox(
@@ -700,7 +775,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               FluentMdl2.storage_acount,
@@ -721,14 +796,13 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                     ),
                                     InkWell(
                                       onTap: () {
-                                        print(args['role']);
                                         Navigator.pushNamed(
                                           context,
                                           estimation,
                                           arguments: {
                                             'sid': args['sid'],
                                             'title': 'Estimation',
-                                            "role": args['role'],
+                                            'role': args['role'],
                                           },
                                         );
                                       },
@@ -743,7 +817,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               Zondicons.currency_dollar,
@@ -764,7 +838,6 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                     ),
                                     InkWell(
                                       onTap: () {
-                                        print(args['role']);
                                         Navigator.of(context).pushNamed(
                                             workinprogress,
                                             arguments: {
@@ -784,7 +857,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               Zondicons.inbox_check,
@@ -825,7 +898,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               FluentMdl2.reservation_orders,
@@ -876,8 +949,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
   }
 
   Widget buildImageList(AsyncSnapshot snapshot) {
-    final data =
-        snapshot.data?.data() as Map<String, dynamic>?; // for DocumentSnapshot
+    final data = snapshot.data?.data() as Map<String, dynamic>?;
     final imageUrls = (data?['imageUrls'] as List?)?.cast<String>() ?? [];
 
     if (imageUrls.isEmpty) {
@@ -947,6 +1019,143 @@ class _SiteDescriptionState extends State<SiteDescription> {
           ),
         );
       },
+    );
+  }
+}
+
+class _SupervisorSelectionDialog extends StatefulWidget {
+  final List<QueryDocumentSnapshot> supervisors;
+  final List<String> initialSelected;
+  final Function(List<String>) onConfirm;
+
+  const _SupervisorSelectionDialog({
+    required this.supervisors,
+    required this.initialSelected,
+    required this.onConfirm,
+  });
+
+  @override
+  __SupervisorSelectionDialogState createState() =>
+      __SupervisorSelectionDialogState();
+}
+
+class __SupervisorSelectionDialogState
+    extends State<_SupervisorSelectionDialog> {
+  late List<String> tempSelected;
+
+  @override
+  void initState() {
+    super.initState();
+    tempSelected = List.from(widget.initialSelected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return AlertDialog(
+      title: const Text("Select Supervisors"),
+      content: SizedBox(
+        width: size.width * 0.8,
+        height: size.height * 0.3,
+        child: ListView.builder(
+          itemCount: widget.supervisors.length,
+          itemBuilder: (context, index) {
+            final supervisor = widget.supervisors[index];
+            final name = supervisor['fullname'] as String;
+            return CheckboxListTile(
+              title: Text(name),
+              value: tempSelected.contains(name),
+              onChanged: (bool? value) {
+                setState(() {
+                  if (value == true) {
+                    tempSelected.add(name);
+                  } else {
+                    tempSelected.remove(name);
+                  }
+                });
+              },
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            widget.onConfirm(tempSelected);
+            Navigator.of(context).pop();
+          },
+          child: const Text("Done"),
+        ),
+      ],
+    );
+  }
+}
+
+class _EngineerSelectionDialog extends StatefulWidget {
+  final List<QueryDocumentSnapshot> engineers;
+  final List<Map<String, String>> initialSelected;
+  final Function(List<Map<String, String>>) onConfirm;
+
+  const _EngineerSelectionDialog({
+    required this.engineers,
+    required this.initialSelected,
+    required this.onConfirm,
+  });
+
+  @override
+  __EngineerSelectionDialogState createState() =>
+      __EngineerSelectionDialogState();
+}
+
+class __EngineerSelectionDialogState extends State<_EngineerSelectionDialog> {
+  late List<Map<String, String>> tempSelected;
+
+  @override
+  void initState() {
+    super.initState();
+    tempSelected = List.from(widget.initialSelected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return AlertDialog(
+      title: const Text("Select Engineers"),
+      content: SizedBox(
+        width: size.width * 0.8,
+        height: size.height * 0.3,
+        child: ListView.builder(
+          itemCount: widget.engineers.length,
+          itemBuilder: (context, index) {
+            final engineer = widget.engineers[index];
+            final name = engineer['fullname'] as String;
+            final id = engineer.id;
+            final engineerMap = {'id': id, 'name': name};
+            return CheckboxListTile(
+              title: Text(name),
+              value: tempSelected.any((e) => e['id'] == id),
+              onChanged: (bool? value) {
+                setState(() {
+                  if (value == true) {
+                    tempSelected.add(engineerMap);
+                  } else {
+                    tempSelected.removeWhere((e) => e['id'] == id);
+                  }
+                });
+              },
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            widget.onConfirm(tempSelected);
+            Navigator.of(context).pop();
+          },
+          child: const Text("Done"),
+        ),
+      ],
     );
   }
 }

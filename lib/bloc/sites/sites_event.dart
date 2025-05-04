@@ -22,7 +22,7 @@ class AddedSiteEvent extends SitesEvent {
 }
 
 class SiteDataEvent extends SitesEvent {
-  final Map<String, dynamic>? siteData; // Changed from List<dynamic>?
+  final Map<String, dynamic>? siteData;
   SiteDataEvent({this.siteData});
 }
 
@@ -50,4 +50,10 @@ class AddSiteEvent extends SitesEvent {
   final SiteModel siteModel;
   final List<XFile> images;
   AddSiteEvent(this.siteModel, this.images);
+}
+
+class UpdateSiteEngineersEvent extends SitesEvent {
+  final String sid;
+  final List<Map<String, String>> engineers;
+  UpdateSiteEngineersEvent({required this.sid, required this.engineers});
 }
