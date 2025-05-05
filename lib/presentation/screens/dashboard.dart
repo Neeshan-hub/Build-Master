@@ -7,7 +7,6 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/emojione_monotone.dart';
 import 'package:iconify_flutter/icons/zondicons.dart';
 import 'package:shimmer/shimmer.dart';
-
 import '../../utils/routes.dart';
 import '../includes/appbar.dart';
 import '../includes/horizontal_site.dart';
@@ -69,21 +68,21 @@ class _DashboardState extends State<Dashboard> {
                           _buildAppBarAction(
                             icon: role == "Admin"
                                 ? Iconify(
-                              EmojioneMonotone.construction_worker,
-                              color: Colors.white,
-                            )
+                                    EmojioneMonotone.construction_worker,
+                                    color: Colors.white,
+                                  )
                                 : const Icon(
-                              Icons.exit_to_app,
-                              color: Colors.white,
-                            ),
+                                    Icons.exit_to_app,
+                                    color: Colors.white,
+                                  ),
                             onPressed: role == "Admin"
                                 ? () =>
-                                Navigator.pushNamed(context, settingspage)
+                                    Navigator.pushNamed(context, settingspage)
                                 : () => ShowCustomModal().showSignOutDialog(
-                              context: context,
-                              height: size.height * 0.25,
-                              width: size.width * 0.8,
-                            ),
+                                      context: context,
+                                      height: size.height * 0.25,
+                                      width: size.width * 0.8,
+                                    ),
                           ),
                           _buildAppBarAction(
                             icon: Iconify(
@@ -100,7 +99,8 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
               Expanded(
-                child: _buildMainContent(size, theme, role, isDarkMode, fullname),
+                child:
+                    _buildMainContent(size, theme, role, isDarkMode, fullname),
               ),
             ],
           );
@@ -173,8 +173,8 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget _buildMainContent(
-      Size size, ThemeData theme, String role, bool isDarkMode, String fullname) {
+  Widget _buildMainContent(Size size, ThemeData theme, String role,
+      bool isDarkMode, String fullname) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: ListView(
@@ -222,7 +222,7 @@ class _DashboardState extends State<Dashboard> {
           title: "Sites",
           icon: "assets/icons/house.png",
           countStream:
-          FirebaseFirestore.instance.collection("sites").snapshots(),
+              FirebaseFirestore.instance.collection("sites").snapshots(),
           color: AppColors.blue,
           isDarkMode: isDarkMode,
         ),
@@ -411,11 +411,11 @@ class _DashboardState extends State<Dashboard> {
                   crossAxisCount: 3,
                   children: List.generate(
                       3,
-                          (index) => Container(
-                        margin: const EdgeInsets.all(8),
-                        height: 100,
-                        color: Colors.white,
-                      )),
+                      (index) => Container(
+                            margin: const EdgeInsets.all(8),
+                            height: 100,
+                            color: Colors.white,
+                          )),
                 ),
                 const SizedBox(height: 32),
                 Container(

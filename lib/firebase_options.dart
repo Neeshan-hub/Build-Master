@@ -83,5 +83,4 @@ class DefaultFirebaseOptions {
     authDomain: 'buildmasterv12025.firebaseapp.com',
     storageBucket: 'buildmasterv12025.firebasestorage.app',
   );
-
 }

@@ -45,14 +45,15 @@ class _OrderPageState extends State<OrderPage> {
     final padding = MediaQuery.of(context).padding;
 
     final Map<String, dynamic> args =
-    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
     showAddOrderModal() {
       return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             content: Form(
               key: _formKey,
               child: SizedBox(
@@ -150,7 +151,8 @@ class _OrderPageState extends State<OrderPage> {
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.symmetric(
                                   horizontal: 24, vertical: 15),
-                              minimumSize: Size(size.width / 4, size.height / 16),
+                              minimumSize:
+                                  Size(size.width / 4, size.height / 16),
                               foregroundColor: AppColors.blue,
                             ),
                             onPressed: () {
@@ -358,7 +360,8 @@ class _OrderPageState extends State<OrderPage> {
                   children: [
                     CircleAvatar(
                       radius: size.width / 9.2,
-                      backgroundColor: approve ? AppColors.green : AppColors.red,
+                      backgroundColor:
+                          approve ? AppColors.green : AppColors.red,
                       child: Iconify(
                         approve ? FluentMdl2.accept : FluentMdl2.cancel,
                         size: size.height / 90 * 4.76,
@@ -397,20 +400,25 @@ class _OrderPageState extends State<OrderPage> {
                         ),
                         BlocConsumer<OrdersBloc, OrdersState>(
                           listener: (context, state) {
-                            if (state is UpdatingSiteOrderState || state is AddingSiteStockState) {
+                            if (state is UpdatingSiteOrderState ||
+                                state is AddingSiteStockState) {
                               BotToast.showCustomLoading(
                                 toastBuilder: (context) => customLoading(size),
                               );
                             }
-                            if (state is CompleteUpdatingSiteOrderState || state is CompletedAddingSiteStockState) {
+                            if (state is CompleteUpdatingSiteOrderState ||
+                                state is CompletedAddingSiteStockState) {
                               BotToast.closeAllLoading();
                               Navigator.of(context).pop();
                               BotToast.showText(
-                                text: approve ? "Order Approved and Added to Stock" : "Order Disapproved",
+                                text: approve
+                                    ? "Order Approved and Added to Stock"
+                                    : "Order Disapproved",
                                 contentColor: AppColors.green,
                               );
                             }
-                            if (state is FailedUpdatingSiteOrderState || state is FailedSiteStockState) {
+                            if (state is FailedUpdatingSiteOrderState ||
+                                state is FailedSiteStockState) {
                               BotToast.closeAllLoading();
                               Navigator.of(context).pop();
                               BotToast.showText(
@@ -426,11 +434,13 @@ class _OrderPageState extends State<OrderPage> {
                               style: ElevatedButton.styleFrom(
                                 elevation: 0,
                                 fixedSize: const Size(103, 33),
-                                backgroundColor: approve ? AppColors.green : AppColors.red,
+                                backgroundColor:
+                                    approve ? AppColors.green : AppColors.red,
                                 foregroundColor: AppColors.white,
                               ),
                               onPressed: () {
-                                BlocProvider.of<OrdersBloc>(context).updateApprovalStatus(
+                                BlocProvider.of<OrdersBloc>(context)
+                                    .updateApprovalStatus(
                                   sid,
                                   oid,
                                   approve ? 'Approved' : 'Disapproved',
@@ -926,7 +936,7 @@ class _OrderPageState extends State<OrderPage> {
                         return ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             fixedSize:
-                            Size(size.width / 4.5, size.height / 90 * 3.4),
+                                Size(size.width / 4.5, size.height / 90 * 3.4),
                             foregroundColor: AppColors.blue,
                             backgroundColor: AppColors.yellow,
                           ),
@@ -934,7 +944,7 @@ class _OrderPageState extends State<OrderPage> {
                             if (_formKey.currentState!.validate()) {
                               BlocProvider.of<OrdersBloc>(context)
                                   .addOrderQuantity(
-                                  sid, oid, double.parse(_qty.text));
+                                      sid, oid, double.parse(_qty.text));
                             }
                           },
                           child: const Iconify(FluentMdl2.forward),
@@ -955,13 +965,11 @@ class _OrderPageState extends State<OrderPage> {
       appBar: PreferredSize(
         preferredSize: Size(size.width, size.height / 90 * 8.5),
         child: CustomAppbar(
-          bgcolor: AppColors.white,
+          bgcolor: AppColors.blue,
           title: args['sitename'],
           leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios_new,
-              size: size.height / 90 * 2.3,
-            ),
+            icon: Icon(Icons.arrow_back_ios_new,
+                size: size.height / 90 * 2.3, color: AppColors.white),
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -981,11 +989,11 @@ class _OrderPageState extends State<OrderPage> {
                 }
               },
               icon: CircleAvatar(
-                backgroundColor: AppColors.yellow,
+                backgroundColor: AppColors.blue,
                 radius: size.width / 12.4,
                 child: Icon(
                   Icons.add,
-                  color: AppColors.blue,
+                  color: AppColors.white,
                   size: size.height / 90 * 2.3,
                 ),
               ),
@@ -1004,370 +1012,406 @@ class _OrderPageState extends State<OrderPage> {
             return snapshot.data!.docs.isEmpty
                 ? const Center(child: Text("No Orders at the Moment"))
                 : SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      CustomBox(
-                        height: size.height / 90 * 4.8,
-                        width: size.width / 8 * 5.9,
-                        radius: 16,
-                        blurRadius: 4.0,
-                        shadowColor: AppColors.customWhite,
-                        color: AppColors.white,
-                        horizontalMargin: padding.top * 0.4,
-                        verticalMargin: padding.top * 0.2,
-                        child: TextFormField(
-                          style: const TextStyle(fontSize: 18),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            prefixIcon: Padding(
-                              padding: EdgeInsets.all(padding.top * 0.3),
-                              child: const Iconify(FluentMdl2.search),
-                            ),
-                          ),
-                        ),
-                      ).customBox(),
-                      IconButton(
-                        onPressed: () {
-                          data.clear();
-                          if (snapshot.data!.docs.isNotEmpty) {
-                            for (int i = 0;
-                            i < snapshot.data!.docs.length;
-                            i++) {
-                              double amount = snapshot.data!.docs[i]
-                              ['quantity'] *
-                                  snapshot.data!.docs[i]['rate'];
-                              data.add({
-                                'sn': "${i + 1}",
-                                "sitename": args['sitename'],
-                                "itemname": snapshot.data!.docs[i]
-                                ['itemname'],
-                                "brandname": snapshot.data!.docs[i]
-                                ['brandname'],
-                                "suppliername": snapshot.data!.docs[i]
-                                ['suppliername'],
-                                "unit": snapshot.data!.docs[i]['unit'],
-                                "quantity": snapshot.data!.docs[i]
-                                ['quantity'],
-                                "status": snapshot.data!.docs[i]['status'],
-                                "rate": snapshot.data!.docs[i]['rate'],
-                                "amount": amount,
-                                "approvalStatus": snapshot.data!.docs[i]
-                                ['approvalStatus'],
-                              });
-                            }
-                          }
-                          double total = 0;
-                          for (int i = 0; i < data.length; i++) {
-                            total += data[i]['amount'];
-                          }
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            CustomBox(
+                              height: size.height / 90 * 4.8,
+                              width: size.width / 8 * 5.9,
+                              radius: 16,
+                              blurRadius: 4.0,
+                              shadowColor: AppColors.customWhite,
+                              color: AppColors.white,
+                              horizontalMargin: padding.top * 0.4,
+                              verticalMargin: padding.top * 0.2,
+                              child: TextFormField(
+                                style: const TextStyle(fontSize: 18),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  prefixIcon: Padding(
+                                    padding: EdgeInsets.all(padding.top * 0.3),
+                                    child: const Iconify(FluentMdl2.search),
+                                  ),
+                                ),
+                              ),
+                            ).customBox(),
+                            IconButton(
+                              onPressed: () {
+                                data.clear();
+                                if (snapshot.data!.docs.isNotEmpty) {
+                                  for (int i = 0;
+                                      i < snapshot.data!.docs.length;
+                                      i++) {
+                                    double amount = snapshot.data!.docs[i]
+                                            ['quantity'] *
+                                        snapshot.data!.docs[i]['rate'];
+                                    data.add({
+                                      'sn': "${i + 1}",
+                                      "sitename": args['sitename'],
+                                      "itemname": snapshot.data!.docs[i]
+                                          ['itemname'],
+                                      "brandname": snapshot.data!.docs[i]
+                                          ['brandname'],
+                                      "suppliername": snapshot.data!.docs[i]
+                                          ['suppliername'],
+                                      "unit": snapshot.data!.docs[i]['unit'],
+                                      "quantity": snapshot.data!.docs[i]
+                                          ['quantity'],
+                                      "status": snapshot.data!.docs[i]
+                                          ['status'],
+                                      "rate": snapshot.data!.docs[i]['rate'],
+                                      "amount": amount,
+                                      "approvalStatus": snapshot.data!.docs[i]
+                                          ['approvalStatus'],
+                                    });
+                                  }
+                                }
+                                double total = 0;
+                                for (int i = 0; i < data.length; i++) {
+                                  total += data[i]['amount'];
+                                }
 
-                          if (data.isEmpty) {
-                            BotToast.showText(
-                                text: "No Orders at the moment",
-                                contentColor: AppColors.red);
-                          } else {
-                            Navigator.of(context).pushNamed(
-                              orderInvoiceSignaturePadPage,
-                              arguments: {
-                                "count": 9,
-                                "data": data,
-                                "total": total,
-                                "name": "Order Invoice ${data[0]['sitename']}"
+                                if (data.isEmpty) {
+                                  BotToast.showText(
+                                      text: "No Orders at the moment",
+                                      contentColor: AppColors.red);
+                                } else {
+                                  Navigator.of(context).pushNamed(
+                                    orderInvoiceSignaturePadPage,
+                                    arguments: {
+                                      "count": 9,
+                                      "data": data,
+                                      "total": total,
+                                      "name":
+                                          "Order Invoice ${data[0]['sitename']}"
+                                    },
+                                  );
+                                }
                               },
-                            );
-                          }
-                        },
-                        icon: CircleAvatar(
-                          backgroundColor: AppColors.yellow,
-                          radius: size.width / 20,
-                          child: Icon(
-                            Icons.picture_as_pdf,
-                            color: AppColors.blue,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: size.height / 90 * 78,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        return CustomBox(
-                          height: size.height / 90 * 15,
-                          width: size.width,
-                          radius: 15,
-                          blurRadius: 4.0,
-                          shadowColor: AppColors.customWhite,
-                          color: AppColors.white,
-                          horizontalMargin: padding.top * 0.3,
-                          verticalMargin: padding.top * 0.2,
-                          child: InkWell(
-                            onTap: () {
-                              showAddQuantityModal(
-                                snapshot.data!.docs[index]['oid'],
-                                snapshot.data!.docs[index]['sid'],
-                              );
-                            },
-                            child: Row(
-                              children: [
-                                Container(
-                                  height: size.height,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: padding.top * 0.2),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      SizedBox(
-                                          height: size.height / 90 * 0.3),
-                                      Text(
-                                        snapshot.data!.docs[index]
-                                        ['itemname'],
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: AppColors.grey,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          SizedBox(
-                                            width: size.width / 7 * 2.6,
-                                            child: Text(
-                                              snapshot.data!.docs[index]
-                                              ['brandname'],
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight:
-                                                FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                          // CustomBox(
-                                          //   height:
-                                          //   size.height / 80 * 2.44,
-                                          //   width: size.width / 3.16,
-                                          //   radius: 15,
-                                          //   blurRadius: 4.0,
-                                          //   shadowColor:
-                                          //   AppColors.customWhite,
-                                          //   color: snapshot
-                                          //       .data!
-                                          //       .docs[index]
-                                          //   ['status'] ==
-                                          //       "Cancelled"
-                                          //       ? AppColors.red
-                                          //       : snapshot.data!.docs[index]
-                                          //   ['status'] ==
-                                          //       "Delivered"
-                                          //       ? AppColors.green
-                                          //       : const Color.fromARGB(
-                                          //       255, 164, 88, 6),
-                                          //   horizontalMargin: 0,
-                                          //   verticalMargin: 0,
-                                          //   child: Center(
-                                          //     child: Text(
-                                          //       snapshot.data!.docs[index]
-                                          //       ['status'],
-                                          //       style: TextStyle(
-                                          //           color:
-                                          //           AppColors.white),
-                                          //     ),
-                                          //   ),
-                                          // ).customBox(),
-                                        ],
-                                      ),
-
-
-                                      Row(
-                                        children: [
-                                          SizedBox(
-                                            width: size.width / 6 * 1.8,
-                                            child: Text(
-                                              "${snapshot.data!.docs[index]['quantity']} ${snapshot.data!.docs[index]['unit']}",
-                                              style: const TextStyle(
-                                                overflow:
-                                                TextOverflow.clip,
-                                                fontSize: 14,
-                                                fontWeight:
-                                                FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                          height: size.height / 90 * 0.1),
-                                    ],
-                                  ),
+                              icon: CircleAvatar(
+                                backgroundColor: AppColors.yellow,
+                                radius: size.width / 20,
+                                child: Icon(
+                                  Icons.picture_as_pdf,
+                                  color: AppColors.blue,
                                 ),
-                                Flexible(
-                                  child: Column(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-
-                                      // In the ListView.builder of OrderPage, replace the delete IconButton section with this
-                                      // This is inside the Flexible -> Column -> children list
-                                      if (!snapshot.data!.docs[index].data().containsKey('approvalStatus') ||
-                                          snapshot.data!.docs[index]['approvalStatus'] == "Pending")
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: IconButton(
-                                            onPressed: () {
-                                              showDeleteDialog(
-                                                snapshot.data!.docs[index]['oid'],
-                                                snapshot.data!.docs[index]['sid'],
-                                              );
-                                            },
-                                            icon: Iconify(
-                                              Zondicons.trash,
-                                              color: AppColors.red,
-                                              size: size.height / 90 * 2.1,
-                                            ),
-                                          ),
-                                        ),
-                                      CustomBox(
-                                        height: size.height / 80 * 2.44,
-                                        width: size.width / 3.16,
-                                        radius: 15,
-                                        blurRadius: 4.0,
-                                        shadowColor: AppColors.customWhite,
-                                        color: snapshot.data!.docs[index].data().containsKey('approvalStatus') &&
-                                            snapshot.data!.docs[index]['approvalStatus'] == "Approved"
-                                            ? AppColors.green
-                                            : snapshot.data!.docs[index].data().containsKey('approvalStatus') &&
-                                            snapshot.data!.docs[index]['approvalStatus'] == "Disapproved"
-                                            ? AppColors.red
-                                            : Colors.orange, // Default to Pending
-                                        horizontalMargin: 0,
-                                        verticalMargin: 0,
-                                        child: Center(
-                                          child: Text(
-                                            snapshot.data!.docs[index].data().containsKey('approvalStatus')
-                                                ? snapshot.data!.docs[index]['approvalStatus']
-                                                : 'Pending',
-                                            style: TextStyle(color: AppColors.white),
-                                          ),
-                                        ),
-                                      ).customBox(),
-                                  
-                                      // Align(
-                                     //    alignment:
-                                     //    Alignment.centerRight,
-                                     //    child: IconButton(
-                                     //      onPressed: () {
-                                     //        showEditSiteOrderModal(
-                                     //          sid: snapshot.data!
-                                     //              .docs[index]['sid'],
-                                     //          oid: snapshot.data!
-                                     //              .docs[index]['oid'],
-                                     //          itemname: snapshot.data!
-                                     //              .docs[index]
-                                     //          ['itemname'],
-                                     //          suppliername: snapshot
-                                     //              .data!
-                                     //              .docs[index]
-                                     //          ['suppliername'],
-                                     //          itembrand: snapshot.data!
-                                     //              .docs[index]
-                                     //          ['brandname'],
-                                     //          quantity: snapshot.data!
-                                     //              .docs[index]
-                                     //          ['quantity'],
-                                     //          status: snapshot.data!
-                                     //              .docs[index]
-                                     //          ['status'],
-                                     //          unit: snapshot.data!
-                                     //              .docs[index]
-                                     //          ['unit'],
-                                     //          rate: snapshot.data!
-                                     //              .docs[index]
-                                     //          ['rate'],
-                                     //          approvalStatus: snapshot
-                                     //              .data!
-                                     //              .docs[index]
-                                     //          ['approvalStatus'],
-                                     //        );
-                                     //      },
-                                     //      icon: Iconify(
-                                     //        FluentMdl2.edit,
-                                     //        color: AppColors.grey,
-                                     //        size: size.height /
-                                     //            90 *
-                                     //            2.1,
-                                     //      ),
-                                     //    ),
-                                     //  ),
-                                      if (
-                                          (args['role'] == 'Supervisor' ||
-                                              args['role'] == 'Admin') )
-                                        Align(
-                                          alignment: Alignment.centerRight,
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                onPressed: () {
-                                                  showApprovalDialog(
-                                                      snapshot.data!
-                                                          .docs[index]['oid'],
-                                                      snapshot.data!.docs[index]
-                                                      ['sid'],
-                                                      true);
-                                                },
-                                                icon: Iconify(
-                                                  FluentMdl2.accept,
-                                                  color: AppColors.green,
-                                                  size:
-                                                  size.height / 90 * 2.1,
-                                                ),
-                                              ),
-                                              IconButton(
-                                                onPressed: () {
-                                                  showApprovalDialog(
-                                                      snapshot.data!
-                                                          .docs[index]['oid'],
-                                                      snapshot.data!.docs[index]
-                                                      ['sid'],
-                                                      false);
-                                                },
-                                                icon: Iconify(
-                                                  FluentMdl2.cancel,
-                                                  color: AppColors.red,
-                                                  size:
-                                                  size.height / 90 * 2.1,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      if(args['role'] == 'Engineer')
-                                        Text("Contact Supervisor to approve requests")
-                                  
-                                    ],
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: size.height / 90 * 78,
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: snapshot.data!.docs.length,
+                            itemBuilder: (context, index) {
+                              return CustomBox(
+                                height: size.height / 90 * 15,
+                                width: size.width,
+                                radius: 15,
+                                blurRadius: 4.0,
+                                shadowColor: AppColors.customWhite,
+                                color: AppColors.white,
+                                horizontalMargin: padding.top * 0.3,
+                                verticalMargin: padding.top * 0.2,
+                                child: InkWell(
+                                  onTap: () {
+                                    showAddQuantityModal(
+                                      snapshot.data!.docs[index]['oid'],
+                                      snapshot.data!.docs[index]['sid'],
+                                    );
+                                  },
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        height: size.height,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: padding.top * 0.2),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SizedBox(
+                                                height: size.height / 90 * 0.3),
+                                            Text(
+                                              snapshot.data!.docs[index]
+                                                  ['itemname'],
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: AppColors.grey,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                SizedBox(
+                                                  width: size.width / 7 * 2.6,
+                                                  child: Text(
+                                                    snapshot.data!.docs[index]
+                                                        ['brandname'],
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                                // CustomBox(
+                                                //   height:
+                                                //   size.height / 80 * 2.44,
+                                                //   width: size.width / 3.16,
+                                                //   radius: 15,
+                                                //   blurRadius: 4.0,
+                                                //   shadowColor:
+                                                //   AppColors.customWhite,
+                                                //   color: snapshot
+                                                //       .data!
+                                                //       .docs[index]
+                                                //   ['status'] ==
+                                                //       "Cancelled"
+                                                //       ? AppColors.red
+                                                //       : snapshot.data!.docs[index]
+                                                //   ['status'] ==
+                                                //       "Delivered"
+                                                //       ? AppColors.green
+                                                //       : const Color.fromARGB(
+                                                //       255, 164, 88, 6),
+                                                //   horizontalMargin: 0,
+                                                //   verticalMargin: 0,
+                                                //   child: Center(
+                                                //     child: Text(
+                                                //       snapshot.data!.docs[index]
+                                                //       ['status'],
+                                                //       style: TextStyle(
+                                                //           color:
+                                                //           AppColors.white),
+                                                //     ),
+                                                //   ),
+                                                // ).customBox(),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: size.width / 6 * 1.8,
+                                                  child: Text(
+                                                    "${snapshot.data!.docs[index]['quantity']} ${snapshot.data!.docs[index]['unit']}",
+                                                    style: const TextStyle(
+                                                      overflow:
+                                                          TextOverflow.clip,
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                                height: size.height / 90 * 0.1),
+                                          ],
+                                        ),
+                                      ),
+                                      Flexible(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            // In the ListView.builder of OrderPage, replace the delete IconButton section with this
+                                            // This is inside the Flexible -> Column -> children list
+                                            if (!snapshot.data!.docs[index]
+                                                    .data()
+                                                    .containsKey(
+                                                        'approvalStatus') ||
+                                                snapshot.data!.docs[index]
+                                                        ['approvalStatus'] ==
+                                                    "Pending")
+                                              Align(
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: IconButton(
+                                                  onPressed: () {
+                                                    showDeleteDialog(
+                                                      snapshot.data!.docs[index]
+                                                          ['oid'],
+                                                      snapshot.data!.docs[index]
+                                                          ['sid'],
+                                                    );
+                                                  },
+                                                  icon: Iconify(
+                                                    Zondicons.trash,
+                                                    color: AppColors.red,
+                                                    size:
+                                                        size.height / 90 * 2.1,
+                                                  ),
+                                                ),
+                                              ),
+                                            CustomBox(
+                                              height: size.height / 80 * 2.44,
+                                              width: size.width / 3.16,
+                                              radius: 15,
+                                              blurRadius: 4.0,
+                                              shadowColor:
+                                                  AppColors.customWhite,
+                                              color: snapshot.data!.docs[index]
+                                                          .data()
+                                                          .containsKey(
+                                                              'approvalStatus') &&
+                                                      snapshot.data!.docs[index][
+                                                              'approvalStatus'] ==
+                                                          "Approved"
+                                                  ? AppColors.green
+                                                  : snapshot.data!.docs[index]
+                                                              .data()
+                                                              .containsKey(
+                                                                  'approvalStatus') &&
+                                                          snapshot.data!.docs[
+                                                                      index][
+                                                                  'approvalStatus'] ==
+                                                              "Disapproved"
+                                                      ? AppColors.red
+                                                      : Colors
+                                                          .orange, // Default to Pending
+                                              horizontalMargin: 0,
+                                              verticalMargin: 0,
+                                              child: Center(
+                                                child: Text(
+                                                  snapshot.data!.docs[index]
+                                                          .data()
+                                                          .containsKey(
+                                                              'approvalStatus')
+                                                      ? snapshot
+                                                              .data!.docs[index]
+                                                          ['approvalStatus']
+                                                      : 'Pending',
+                                                  style: TextStyle(
+                                                      color: AppColors.white),
+                                                ),
+                                              ),
+                                            ).customBox(),
+
+                                            // Align(
+                                            //    alignment:
+                                            //    Alignment.centerRight,
+                                            //    child: IconButton(
+                                            //      onPressed: () {
+                                            //        showEditSiteOrderModal(
+                                            //          sid: snapshot.data!
+                                            //              .docs[index]['sid'],
+                                            //          oid: snapshot.data!
+                                            //              .docs[index]['oid'],
+                                            //          itemname: snapshot.data!
+                                            //              .docs[index]
+                                            //          ['itemname'],
+                                            //          suppliername: snapshot
+                                            //              .data!
+                                            //              .docs[index]
+                                            //          ['suppliername'],
+                                            //          itembrand: snapshot.data!
+                                            //              .docs[index]
+                                            //          ['brandname'],
+                                            //          quantity: snapshot.data!
+                                            //              .docs[index]
+                                            //          ['quantity'],
+                                            //          status: snapshot.data!
+                                            //              .docs[index]
+                                            //          ['status'],
+                                            //          unit: snapshot.data!
+                                            //              .docs[index]
+                                            //          ['unit'],
+                                            //          rate: snapshot.data!
+                                            //              .docs[index]
+                                            //          ['rate'],
+                                            //          approvalStatus: snapshot
+                                            //              .data!
+                                            //              .docs[index]
+                                            //          ['approvalStatus'],
+                                            //        );
+                                            //      },
+                                            //      icon: Iconify(
+                                            //        FluentMdl2.edit,
+                                            //        color: AppColors.grey,
+                                            //        size: size.height /
+                                            //            90 *
+                                            //            2.1,
+                                            //      ),
+                                            //    ),
+                                            //  ),
+                                            if ((args['role'] == 'Supervisor' ||
+                                                args['role'] == 'Admin'))
+                                              Align(
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    IconButton(
+                                                      onPressed: () {
+                                                        showApprovalDialog(
+                                                            snapshot.data!
+                                                                    .docs[index]
+                                                                ['oid'],
+                                                            snapshot.data!
+                                                                    .docs[index]
+                                                                ['sid'],
+                                                            true);
+                                                      },
+                                                      icon: Iconify(
+                                                        FluentMdl2.accept,
+                                                        color: AppColors.green,
+                                                        size: size.height /
+                                                            90 *
+                                                            2.1,
+                                                      ),
+                                                    ),
+                                                    IconButton(
+                                                      onPressed: () {
+                                                        showApprovalDialog(
+                                                            snapshot.data!
+                                                                    .docs[index]
+                                                                ['oid'],
+                                                            snapshot.data!
+                                                                    .docs[index]
+                                                                ['sid'],
+                                                            false);
+                                                      },
+                                                      icon: Iconify(
+                                                        FluentMdl2.cancel,
+                                                        color: AppColors.red,
+                                                        size: size.height /
+                                                            90 *
+                                                            2.1,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            if (args['role'] == 'Engineer')
+                                              Text(
+                                                  "Contact Supervisor to approve requests")
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ).customBox();
+                            },
                           ),
-                        ).customBox();
-                      },
+                        )
+                      ],
                     ),
-                  )
-                ],
-              ),
-            );
+                  );
           } else {
             return Center(
               child: Builder(

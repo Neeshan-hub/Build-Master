@@ -13,4 +13,5 @@ class AppColors {
   static Color grey = getColor("606060");
   static Color green = getColor("34A853");
   static Color orange = getColor("FF9900");
+  static const Color lightGrey = Color(0xFFF5F5F5);
 }

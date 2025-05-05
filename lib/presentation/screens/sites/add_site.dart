@@ -52,7 +52,7 @@ class _AddSitePageState extends State<AddSitePage> {
       appBar: PreferredSize(
         preferredSize: Size(size.width, size.height / 90 * 8.5),
         child: CustomAppbar(
-          bgcolor: AppColors.white,
+          bgcolor: AppColors.blue,
           title: "Add Sites",
           leading: IconButton(
             icon: Icon(
