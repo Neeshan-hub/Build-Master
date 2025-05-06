@@ -1291,7 +1291,7 @@ class _OrderPageState extends State<OrderPage> {
                                                               'approvalStatus')
                                                       ? snapshot
                                                               .data!.docs[index]
-                                                          ['approvalStatus']
+                                                          ['approvalStatus']??"Pending"
                                                       : 'Pending',
                                                   style: TextStyle(
                                                       color: AppColors.white),
