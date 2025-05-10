@@ -159,7 +159,7 @@ class _DashboardState extends State<Dashboard> {
                   fullname,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

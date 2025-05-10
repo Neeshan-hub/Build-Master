@@ -43,7 +43,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
     CarouselSliderController carouselController = CarouselSliderController();
 
     final Map<String, dynamic> args =
-    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
     showEditSiteModal({
       required String sid,
@@ -258,19 +258,19 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         context: context,
                                         builder: (context) =>
                                             _SupervisorSelectionDialog(
-                                              supervisors: supervisors,
-                                              initialSelected: selectedSupervisors,
-                                              onConfirm: (List<String> selected) {
-                                                setState(() {
-                                                  selectedSupervisors = selected;
-                                                });
-                                              },
-                                            ),
+                                          supervisors: supervisors,
+                                          initialSelected: selectedSupervisors,
+                                          onConfirm: (List<String> selected) {
+                                            setState(() {
+                                              selectedSupervisors = selected;
+                                            });
+                                          },
+                                        ),
                                       );
                                     },
                                     child: Padding(
                                       padding:
-                                      EdgeInsets.all(padding.top * 0.4),
+                                          EdgeInsets.all(padding.top * 0.4),
                                       child: Text(
                                         selectedSupervisors.isEmpty
                                             ? "Assign Supervisors"
@@ -287,7 +287,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                 SizedBox(height: size.height / 90 * 1.538),
                                 Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceAround,
+                                      MainAxisAlignment.spaceAround,
                                   children: [
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
@@ -317,7 +317,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                           );
                                         }
                                         if (state
-                                        is CompleteUpdatingSiteState) {
+                                            is CompleteUpdatingSiteState) {
                                           BotToast.closeAllLoading();
                                           Navigator.of(context).pop();
                                           BotToast.showText(
@@ -346,7 +346,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                             if (_formKey.currentState!
                                                 .validate()) {
                                               BlocProvider.of<SitesBloc>(
-                                                  context)
+                                                      context)
                                                   .updateSiteInfo(
                                                 sid: sid,
                                                 sitename: sitename,
@@ -355,9 +355,9 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                                 phone: phone,
                                                 sitedesc: about,
                                                 supervisor: selectedSupervisors
-                                                    .isNotEmpty
+                                                        .isNotEmpty
                                                     ? selectedSupervisors
-                                                    .join(", ")
+                                                        .join(", ")
                                                     : "",
                                               );
                                             }
@@ -397,26 +397,26 @@ class _SiteDescriptionState extends State<SiteDescription> {
           action: [
             args['role'] == "Admin"
                 ? IconButton(
-              onPressed: () {
-                showEditSiteModal(
-                  sid: sid,
-                  sitename: sitename,
-                  sitelocation: sitelocation,
-                  clientname: clientname,
-                  phone: phone,
-                  about: about,
-                );
-              },
-              icon: CircleAvatar(
-                backgroundColor: AppColors.blue,
-                radius: size.width / 12.4,
-                child: Iconify(
-                  FluentMdl2.edit,
-                  color: AppColors.white,
-                  size: size.height / 90 * 2.3,
-                ),
-              ),
-            )
+                    onPressed: () {
+                      showEditSiteModal(
+                        sid: sid,
+                        sitename: sitename,
+                        sitelocation: sitelocation,
+                        clientname: clientname,
+                        phone: phone,
+                        about: about,
+                      );
+                    },
+                    icon: CircleAvatar(
+                      backgroundColor: AppColors.blue,
+                      radius: size.width / 12.4,
+                      child: Iconify(
+                        FluentMdl2.edit,
+                        color: AppColors.white,
+                        size: size.height / 90 * 2.3,
+                      ),
+                    ),
+                  )
                 : Container(),
           ],
           bgcolor: AppColors.blue,
@@ -446,56 +446,56 @@ class _SiteDescriptionState extends State<SiteDescription> {
                 children: [
                   Container(
                     padding:
-                    EdgeInsets.symmetric(horizontal: padding.top * 0.8),
+                        EdgeInsets.symmetric(horizontal: padding.top * 0.8),
                     child: snapshot.data!.docs.isEmpty
                         ? Container()
                         : CarouselSlider.builder(
-                      carouselController: carouselController,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index, _) {
-                        return snapshot.data!.docs[index]['image'] == null
-                            ? Container()
-                            : PageView(
-                          onPageChanged: (value) {
-                            setState(() {
-                              dotposition = value;
-                            });
-                          },
-                          children: [
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: padding.top * 0.2,
-                                  vertical: padding.top * 0.2),
-                              decoration: BoxDecoration(
-                                color: AppColors.blue,
-                                image: DecorationImage(
-                                  image: NetworkImage(snapshot
-                                      .data!.docs[index]['image']),
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
+                            carouselController: carouselController,
+                            itemCount: snapshot.data!.docs.length,
+                            itemBuilder: (context, index, _) {
+                              return snapshot.data!.docs[index]['image'] == null
+                                  ? Container()
+                                  : PageView(
+                                      onPageChanged: (value) {
+                                        setState(() {
+                                          dotposition = value;
+                                        });
+                                      },
+                                      children: [
+                                        Container(
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: padding.top * 0.2,
+                                              vertical: padding.top * 0.2),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.blue,
+                                            image: DecorationImage(
+                                              image: NetworkImage(snapshot
+                                                  .data!.docs[index]['image']),
+                                              fit: BoxFit.fill,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                            },
+                            options: CarouselOptions(
+                              viewportFraction: 1.0,
+                              height: size.height / 90 * 15.5,
                             ),
-                          ],
-                        );
-                      },
-                      options: CarouselOptions(
-                        viewportFraction: 1.0,
-                        height: size.height / 90 * 15.5,
-                      ),
-                    ),
+                          ),
                   ),
                   SizedBox(height: size.height / 90 * 1.3),
                   snapshot.data!.docs.isEmpty
                       ? Container()
                       : Align(
-                    alignment: Alignment.center,
-                    child: CarouselIndicator(
-                      count: snapshot.data!.docs.length,
-                      activeColor: AppColors.yellow,
-                      color: AppColors.blue,
-                      index: dotposition,
-                    ),
-                  ),
+                          alignment: Alignment.center,
+                          child: CarouselIndicator(
+                            count: snapshot.data!.docs.length,
+                            activeColor: AppColors.yellow,
+                            color: AppColors.blue,
+                            index: dotposition,
+                          ),
+                        ),
                   StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                     stream: FirebaseFirestore.instance
                         .collection("sites")
@@ -512,8 +512,8 @@ class _SiteDescriptionState extends State<SiteDescription> {
                         about = data['sitedesc']?.toString() ?? '';
                         selectedEngineers = data.containsKey('engineers')
                             ? (data['engineers'] as List<dynamic>)
-                            .map((e) => Map<String, String>.from(e))
-                            .toList()
+                                .map((e) => Map<String, String>.from(e))
+                                .toList()
                             : [];
                         selectedSupervisors = data.containsKey('supervisor')
                             ? (data['supervisor']?.toString().split(", ") ?? [])
@@ -540,7 +540,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                               SizedBox(height: size.height / 90 * 1.0),
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   SizedBox(
                                     width: size.width / 2 * 1.4,
@@ -576,7 +576,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                               SizedBox(height: size.height / 90 * 0.5),
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "+977${snapshot.data!['phone']}",
@@ -663,57 +663,61 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                             decoration: BoxDecoration(
                                               color: AppColors.customWhite,
                                               borderRadius:
-                                              BorderRadius.circular(10),
+                                                  BorderRadius.circular(10),
                                             ),
                                             child: Padding(
-                                              padding: const EdgeInsets.symmetric(
-                                                  horizontal: 5.0,
-                                                  vertical: 8),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 5.0,
+                                                      vertical: 8),
                                               child: InkWell(
                                                 onTap: () {
                                                   showDialog(
                                                     context: context,
                                                     builder: (context) =>
                                                         _EngineerSelectionDialog(
-                                                          engineers: engineers,
-                                                          initialSelected:
+                                                      engineers: engineers,
+                                                      initialSelected:
                                                           selectedEngineers,
-                                                          onConfirm:
-                                                              (List<Map<String, String>>
+                                                      onConfirm: (List<
+                                                              Map<String,
+                                                                  String>>
                                                           selected) {
-                                                            setState(() {
-                                                              selectedEngineers =
-                                                                  selected;
-                                                            });
-                                                            BlocProvider.of<
-                                                                SitesBloc>(
+                                                        setState(() {
+                                                          selectedEngineers =
+                                                              selected;
+                                                        });
+                                                        BlocProvider.of<
+                                                                    SitesBloc>(
                                                                 context)
-                                                                .add(
-                                                              UpdateSiteEngineersEvent(
-                                                                sid: sid,
-                                                                engineers:
+                                                            .add(
+                                                          UpdateSiteEngineersEvent(
+                                                            sid: sid,
+                                                            engineers:
                                                                 selectedEngineers,
-                                                              ),
-                                                            );
-                                                            print(
-                                                                'the selected engineers are');
-                                                            print(selectedEngineers);
-                                                          },
-                                                        ),
+                                                          ),
+                                                        );
+                                                        print(
+                                                            'the selected engineers are');
+                                                        print(
+                                                            selectedEngineers);
+                                                      },
+                                                    ),
                                                   );
                                                 },
                                                 child: Row(
-                                                  mainAxisSize: MainAxisSize.max,
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       "Add Engineers",
                                                       style: TextStyle(
                                                         color: AppColors.blue,
                                                         fontWeight:
-                                                        FontWeight.w700,
+                                                            FontWeight.w700,
                                                         fontSize: 18,
                                                       ),
                                                     ),
@@ -743,7 +747,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                 child: GridView(
                                   physics: const NeverScrollableScrollPhysics(),
                                   gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                      SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
                                     mainAxisSpacing: padding.top * 0.4,
                                     crossAxisSpacing: padding.top * 0.4,
@@ -775,7 +779,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                              MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               FluentMdl2.storage_acount,
@@ -817,7 +821,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                              MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               Zondicons.currency_dollar,
@@ -857,7 +861,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                              MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               Zondicons.inbox_check,
@@ -898,7 +902,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                              MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               FluentMdl2.reservation_orders,
