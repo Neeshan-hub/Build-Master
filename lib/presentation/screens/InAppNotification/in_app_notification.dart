@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -123,8 +124,10 @@ class NotificationsPage extends StatelessWidget {
 class NotificationList extends StatelessWidget {
   NotificationList({super.key});
 
-  final Stream<QuerySnapshot> _notificationsStream = FirebaseFirestore.instance
+  final user = FirebaseAuth.instance.currentUser;
+  late final Stream<QuerySnapshot> _notificationsStream = FirebaseFirestore.instance
       .collection('notifications')
+      .where('recipients', arrayContains: user?.uid ?? '') // Filter by current user ID
       .orderBy('timestamp', descending: true)
       .snapshots();
 
@@ -211,6 +214,7 @@ class NotificationList extends StatelessWidget {
   }
 
   Widget _buildErrorState(String error) {
+    print(error);
     return Center(
       child: Text(
         'Error: $error',

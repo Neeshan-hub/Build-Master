@@ -54,6 +54,7 @@ class AddSiteEvent extends SitesEvent {
 
 class UpdateSiteEngineersEvent extends SitesEvent {
   final String sid;
+  final String siteName;
   final List<Map<String, String>> engineers;
-  UpdateSiteEngineersEvent({required this.sid, required this.engineers});
+  UpdateSiteEngineersEvent({required this.sid,required this.siteName, required this.engineers});
 }

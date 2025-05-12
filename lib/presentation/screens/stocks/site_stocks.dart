@@ -51,8 +51,7 @@ class _SiteStocksState extends State<SiteStocks> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             content: Form(
                 key: _formKey,
                 child: SizedBox(
@@ -168,6 +167,12 @@ class _SiteStocksState extends State<SiteStocks> {
                                 foregroundColor: AppColors.blue,
                               ),
                               onPressed: () {
+                                _itemname.clear();
+                                _brandname.clear();
+                                _suppliername.clear();
+                                _quantity.clear();
+                                _rate.clear();
+                                _unit.clear();
                                 Navigator.of(context).pop();
                               },
                               child: const Text(
@@ -193,6 +198,13 @@ class _SiteStocksState extends State<SiteStocks> {
                                   BotToast.showText(
                                       text: "New Stock Added",
                                       contentColor: AppColors.green);
+                                  _itemname.clear();
+                                  _brandname.clear();
+                                  _suppliername.clear();
+                                  _quantity.clear();
+                                  _rate.clear();
+                                  _unit.clear();
+                                  Navigator.of(context).pop();
                                 }
                                 if (state is FailedSiteStockState) {
                                   BotToast.closeAllLoading();
@@ -245,7 +257,6 @@ class _SiteStocksState extends State<SiteStocks> {
         },
       );
     }
-
     showDeleteDialog(String skid, String sid) {
       return showDialog(
           context: context,
@@ -841,7 +852,16 @@ class _SiteStocksState extends State<SiteStocks> {
             IconButton(
               onPressed: () {
                 print(args.toString());
-               // showAddStockModal();
+                if (args['role'] == 'Supervisor' || args['role'] == 'Admin') {
+                  showAddStockModal();
+                }
+                else {
+                BotToast.showText(
+                text: "Engineers need to request order",
+                contentColor: AppColors.red,
+                duration: const Duration(seconds: 3),
+                );
+                }
               },
               icon: CircleAvatar(
                 backgroundColor: AppColors.blue,
@@ -908,7 +928,9 @@ class _SiteStocksState extends State<SiteStocks> {
                                         unit: unit,
                                         rate: rate,
                                       );
-                                    } else {
+                                    }
+
+    else {
                                       BotToast.showText(
                                         text: "Only Supervisors or Admins can edit stock",
                                         contentColor: AppColors.red,

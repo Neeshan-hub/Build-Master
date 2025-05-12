@@ -26,7 +26,6 @@ class SiteDescription extends StatefulWidget {
 
 class _SiteDescriptionState extends State<SiteDescription> {
   final _formKey = GlobalKey<FormState>();
-  List<String> selectedSupervisors = [];
   List<Map<String, String>> selectedEngineers = [];
   String sid = "";
   String sitename = "";
@@ -43,7 +42,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
     CarouselSliderController carouselController = CarouselSliderController();
 
     final Map<String, dynamic> args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
     showEditSiteModal({
       required String sid,
@@ -52,7 +51,12 @@ class _SiteDescriptionState extends State<SiteDescription> {
       required String clientname,
       required String phone,
       required String about,
+      required String? initialSupervisor,
+      required String? initialSupervisorId,
     }) {
+      String? selectedSupervisor = initialSupervisor;
+      String? selectedSupervisorId = initialSupervisorId;
+
       return showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -60,8 +64,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
               stream: FirebaseFirestore.instance
                   .collection("users")
                   .where("role", isEqualTo: "Supervisor")
-                  .get()
-                  .asStream(),
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final supervisors = snapshot.data!.docs;
@@ -258,23 +261,23 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         context: context,
                                         builder: (context) =>
                                             _SupervisorSelectionDialog(
-                                          supervisors: supervisors,
-                                          initialSelected: selectedSupervisors,
-                                          onConfirm: (List<String> selected) {
-                                            setState(() {
-                                              selectedSupervisors = selected;
-                                            });
-                                          },
-                                        ),
+                                              supervisors: supervisors,
+                                              initialSelected: selectedSupervisor,
+                                              initialSelectedId: selectedSupervisorId,
+                                              onConfirm: (String? name, String? id) {
+                                                selectedSupervisor = name;
+                                                selectedSupervisorId = id;
+                                                print(
+                                                    'Confirmed Supervisor: $name, ID: $id');
+                                              },
+                                            ),
                                       );
                                     },
                                     child: Padding(
                                       padding:
-                                          EdgeInsets.all(padding.top * 0.4),
+                                      EdgeInsets.all(padding.top * 0.4),
                                       child: Text(
-                                        selectedSupervisors.isEmpty
-                                            ? "Assign Supervisors"
-                                            : selectedSupervisors.join(", "),
+                                        selectedSupervisor ?? "Assign Supervisor",
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
@@ -287,7 +290,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                 SizedBox(height: size.height / 90 * 1.538),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
+                                  MainAxisAlignment.spaceAround,
                                   children: [
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
@@ -317,7 +320,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                           );
                                         }
                                         if (state
-                                            is CompleteUpdatingSiteState) {
+                                        is CompleteUpdatingSiteState) {
                                           BotToast.closeAllLoading();
                                           Navigator.of(context).pop();
                                           BotToast.showText(
@@ -343,10 +346,12 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                             foregroundColor: AppColors.blue,
                                           ),
                                           onPressed: () {
+                                            print(
+                                                'Updating with Supervisor: $selectedSupervisor, ID: $selectedSupervisorId');
                                             if (_formKey.currentState!
                                                 .validate()) {
                                               BlocProvider.of<SitesBloc>(
-                                                      context)
+                                                  context)
                                                   .updateSiteInfo(
                                                 sid: sid,
                                                 sitename: sitename,
@@ -354,11 +359,10 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                                 clientname: clientname,
                                                 phone: phone,
                                                 sitedesc: about,
-                                                supervisor: selectedSupervisors
-                                                        .isNotEmpty
-                                                    ? selectedSupervisors
-                                                        .join(", ")
-                                                    : "",
+                                                supervisor:
+                                                selectedSupervisor ?? "",
+                                                supervisorId:
+                                                selectedSupervisorId ?? "",
                                               );
                                             }
                                           },
@@ -396,7 +400,17 @@ class _SiteDescriptionState extends State<SiteDescription> {
           title: args['sitename'],
           action: [
             args['role'] == "Admin"
-                ? IconButton(
+                ? StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection("sites")
+                  .doc(args['sid'])
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final data = snapshot.data!.data() ?? {};
+                  final currentSupervisor = data['supervisor']?.toString();
+                  final currentSupervisorId = data['supervisorId']?.toString();
+                  return IconButton(
                     onPressed: () {
                       showEditSiteModal(
                         sid: sid,
@@ -405,6 +419,8 @@ class _SiteDescriptionState extends State<SiteDescription> {
                         clientname: clientname,
                         phone: phone,
                         about: about,
+                        initialSupervisor: currentSupervisor,
+                        initialSupervisorId: currentSupervisorId,
                       );
                     },
                     icon: CircleAvatar(
@@ -416,7 +432,12 @@ class _SiteDescriptionState extends State<SiteDescription> {
                         size: size.height / 90 * 2.3,
                       ),
                     ),
-                  )
+                  );
+                } else {
+                  return Container();
+                }
+              },
+            )
                 : Container(),
           ],
           bgcolor: AppColors.blue,
@@ -446,56 +467,56 @@ class _SiteDescriptionState extends State<SiteDescription> {
                 children: [
                   Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: padding.top * 0.8),
+                    EdgeInsets.symmetric(horizontal: padding.top * 0.8),
                     child: snapshot.data!.docs.isEmpty
                         ? Container()
                         : CarouselSlider.builder(
-                            carouselController: carouselController,
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (context, index, _) {
-                              return snapshot.data!.docs[index]['image'] == null
-                                  ? Container()
-                                  : PageView(
-                                      onPageChanged: (value) {
-                                        setState(() {
-                                          dotposition = value;
-                                        });
-                                      },
-                                      children: [
-                                        Container(
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: padding.top * 0.2,
-                                              vertical: padding.top * 0.2),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.blue,
-                                            image: DecorationImage(
-                                              image: NetworkImage(snapshot
-                                                  .data!.docs[index]['image']),
-                                              fit: BoxFit.fill,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                            },
-                            options: CarouselOptions(
-                              viewportFraction: 1.0,
-                              height: size.height / 90 * 15.5,
+                      carouselController: carouselController,
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index, _) {
+                        return snapshot.data!.docs[index]['image'] == null
+                            ? Container()
+                            : PageView(
+                          onPageChanged: (value) {
+                            setState(() {
+                              dotposition = value;
+                            });
+                          },
+                          children: [
+                            Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: padding.top * 0.2,
+                                  vertical: padding.top * 0.2),
+                              decoration: BoxDecoration(
+                                color: AppColors.blue,
+                                image: DecorationImage(
+                                  image: NetworkImage(snapshot
+                                      .data!.docs[index]['image']),
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
+                        );
+                      },
+                      options: CarouselOptions(
+                        viewportFraction: 1.0,
+                        height: size.height / 90 * 15.5,
+                      ),
+                    ),
                   ),
                   SizedBox(height: size.height / 90 * 1.3),
                   snapshot.data!.docs.isEmpty
                       ? Container()
                       : Align(
-                          alignment: Alignment.center,
-                          child: CarouselIndicator(
-                            count: snapshot.data!.docs.length,
-                            activeColor: AppColors.yellow,
-                            color: AppColors.blue,
-                            index: dotposition,
-                          ),
-                        ),
+                    alignment: Alignment.center,
+                    child: CarouselIndicator(
+                      count: snapshot.data!.docs.length,
+                      activeColor: AppColors.yellow,
+                      color: AppColors.blue,
+                      index: dotposition,
+                    ),
+                  ),
                   StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                     stream: FirebaseFirestore.instance
                         .collection("sites")
@@ -512,12 +533,12 @@ class _SiteDescriptionState extends State<SiteDescription> {
                         about = data['sitedesc']?.toString() ?? '';
                         selectedEngineers = data.containsKey('engineers')
                             ? (data['engineers'] as List<dynamic>)
-                                .map((e) => Map<String, String>.from(e))
-                                .toList()
+                            .map((e) => Map<String, String>.from(e))
+                            .toList()
                             : [];
-                        selectedSupervisors = data.containsKey('supervisor')
-                            ? (data['supervisor']?.toString().split(", ") ?? [])
-                            : [];
+                        final currentSupervisor = data['supervisor']?.toString();
+                        final currentSupervisorId = data['supervisorId']?.toString();
+
                         return Container(
                           height: MediaQuery.of(context).size.height,
                           padding: EdgeInsets.symmetric(
@@ -540,7 +561,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                               SizedBox(height: size.height / 90 * 1.0),
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   SizedBox(
                                     width: size.width / 2 * 1.4,
@@ -576,7 +597,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                               SizedBox(height: size.height / 90 * 0.5),
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "+977${snapshot.data!['phone']}",
@@ -632,7 +653,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                 ),
                               ),
                               Text(
-                                "Supervisors: ${selectedSupervisors.isNotEmpty ? selectedSupervisors.join(", ") : "None"}",
+                                "Supervisor: ${currentSupervisor ?? "None"}",
                                 style: TextStyle(
                                   color: AppColors.blue,
                                   fontWeight: FontWeight.w700,
@@ -663,61 +684,63 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                             decoration: BoxDecoration(
                                               color: AppColors.customWhite,
                                               borderRadius:
-                                                  BorderRadius.circular(10),
+                                              BorderRadius.circular(10),
                                             ),
                                             child: Padding(
                                               padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 5.0,
-                                                      vertical: 8),
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 5.0,
+                                                  vertical: 8),
                                               child: InkWell(
                                                 onTap: () {
                                                   showDialog(
                                                     context: context,
                                                     builder: (context) =>
                                                         _EngineerSelectionDialog(
-                                                      engineers: engineers,
-                                                      initialSelected:
+                                                          engineers: engineers,
+                                                          initialSelected:
                                                           selectedEngineers,
-                                                      onConfirm: (List<
+                                                          onConfirm: (List<
                                                               Map<String,
                                                                   String>>
                                                           selected) {
-                                                        setState(() {
-                                                          selectedEngineers =
-                                                              selected;
-                                                        });
-                                                        BlocProvider.of<
-                                                                    SitesBloc>(
+                                                            setState(() {
+                                                              selectedEngineers =
+                                                                  selected;
+                                                            });
+                                                            BlocProvider.of<
+                                                                SitesBloc>(
                                                                 context)
-                                                            .add(
-                                                          UpdateSiteEngineersEvent(
-                                                            sid: sid,
-                                                            engineers:
+                                                                .add(
+                                                              UpdateSiteEngineersEvent(
+                                                                sid: sid,
+                                                                siteName:
+                                                                args['sitename'],
+                                                                engineers:
                                                                 selectedEngineers,
-                                                          ),
-                                                        );
-                                                        print(
-                                                            'the selected engineers are');
-                                                        print(
-                                                            selectedEngineers);
-                                                      },
-                                                    ),
+                                                              ),
+                                                            );
+                                                            print(
+                                                                'the selected engineers are');
+                                                            print(
+                                                                selectedEngineers);
+                                                          },
+                                                        ),
                                                   );
                                                 },
                                                 child: Row(
                                                   mainAxisSize:
-                                                      MainAxisSize.max,
+                                                  MainAxisSize.max,
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                                   children: [
                                                     Text(
                                                       "Add Engineers",
                                                       style: TextStyle(
                                                         color: AppColors.blue,
                                                         fontWeight:
-                                                            FontWeight.w700,
+                                                        FontWeight.w700,
                                                         fontSize: 18,
                                                       ),
                                                     ),
@@ -747,7 +770,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                 child: GridView(
                                   physics: const NeverScrollableScrollPhysics(),
                                   gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                  SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2,
                                     mainAxisSpacing: padding.top * 0.4,
                                     crossAxisSpacing: padding.top * 0.4,
@@ -779,7 +802,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               FluentMdl2.storage_acount,
@@ -821,7 +844,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               Zondicons.currency_dollar,
@@ -861,7 +884,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               Zondicons.inbox_check,
@@ -902,7 +925,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                         verticalMargin: 0,
                                         child: Column(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.spaceAround,
                                           children: [
                                             Iconify(
                                               FluentMdl2.reservation_orders,
@@ -1029,12 +1052,14 @@ class _SiteDescriptionState extends State<SiteDescription> {
 
 class _SupervisorSelectionDialog extends StatefulWidget {
   final List<QueryDocumentSnapshot> supervisors;
-  final List<String> initialSelected;
-  final Function(List<String>) onConfirm;
+  final String? initialSelected;
+  final String? initialSelectedId;
+  final Function(String?, String?) onConfirm;
 
   const _SupervisorSelectionDialog({
     required this.supervisors,
     required this.initialSelected,
+    required this.initialSelectedId,
     required this.onConfirm,
   });
 
@@ -1045,19 +1070,21 @@ class _SupervisorSelectionDialog extends StatefulWidget {
 
 class __SupervisorSelectionDialogState
     extends State<_SupervisorSelectionDialog> {
-  late List<String> tempSelected;
+  String? selectedName;
+  String? selectedId;
 
   @override
   void initState() {
     super.initState();
-    tempSelected = List.from(widget.initialSelected);
+    selectedName = widget.initialSelected;
+    selectedId = widget.initialSelectedId;
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return AlertDialog(
-      title: const Text("Select Supervisors"),
+      title: const Text("Select Supervisor"),
       content: SizedBox(
         width: size.width * 0.8,
         height: size.height * 0.3,
@@ -1066,16 +1093,15 @@ class __SupervisorSelectionDialogState
           itemBuilder: (context, index) {
             final supervisor = widget.supervisors[index];
             final name = supervisor['fullname'] as String;
-            return CheckboxListTile(
+            final id = supervisor.id;
+            return RadioListTile<String>(
               title: Text(name),
-              value: tempSelected.contains(name),
-              onChanged: (bool? value) {
+              value: name,
+              groupValue: selectedName,
+              onChanged: (value) {
                 setState(() {
-                  if (value == true) {
-                    tempSelected.add(name);
-                  } else {
-                    tempSelected.remove(name);
-                  }
+                  selectedName = value;
+                  selectedId = id;
                 });
               },
             );
@@ -1085,7 +1111,7 @@ class __SupervisorSelectionDialogState
       actions: [
         TextButton(
           onPressed: () {
-            widget.onConfirm(tempSelected);
+            widget.onConfirm(selectedName, selectedId);
             Navigator.of(context).pop();
           },
           child: const Text("Done"),

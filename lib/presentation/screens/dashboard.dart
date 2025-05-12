@@ -179,6 +179,7 @@ class _DashboardState extends State<Dashboard> {
       padding: const EdgeInsets.all(24),
       child: ListView(
         children: [
+          if(role == "Admin")
           _buildStatsGrid(size, isDarkMode),
           const SizedBox(height: 24),
           _buildSectionHeader("Recent Activities", Icons.construction),

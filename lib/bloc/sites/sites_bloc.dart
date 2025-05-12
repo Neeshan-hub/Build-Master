@@ -98,11 +98,11 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
       });
 
       // Log notification for site addition
-      await _logNotification(
-        action: "Site Added",
-        details: "New site '${event.siteModel.sitename}' created",
-        siteId: id,
-      );
+      // await _logNotification(
+      //   action: "Site Added",
+      //   details: "New site '${event.siteModel.sitename}' created",
+      //   siteId: id,
+      // );
 
       add(CompletedSiteEvent());
       add(AddedSiteEvent(message: "Site added successfully"));
@@ -232,11 +232,11 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
       }
 
       // Log notification for site deletion
-      await _logNotification(
-        action: "Site Deleted",
-        details: "Site '$sname' deleted",
-        siteId: sid,
-      );
+      // await _logNotification(
+      //   action: "Site Deleted",
+      //   details: "Site '$sname' deleted",
+      //   siteId: sid,
+      // );
 
       BotToast.closeAllLoading();
       Navigator.of(context).pop();
@@ -263,6 +263,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     required String phone,
     required String sitedesc,
     required String supervisor,
+    required String supervisorId,
   }) async {
     try {
       add(UpdatingSiteEvent());
@@ -279,11 +280,11 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "lastActivity": FieldValue.serverTimestamp(),
       });
 
-      // Log notification for site update
       await _logNotification(
         action: "Site Updated",
-        details: "Updated site '$sitename'",
+        details: "Updated site '$sitename' details",
         siteId: sid,
+        recipients: supervisorId.isNotEmpty ? [supervisorId] : [],
       );
 
       add(CompleteUpdatingSiteEvent());
@@ -305,12 +306,17 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
       });
       print('updating engineers');
       print(event.engineers);
-
+      List<String> engineersAssigned = [];
+      event.engineers.forEach((item) {
+        engineersAssigned.add(item['id']!);
+      });
+      print(engineersAssigned);
       // Log notification for engineer assignment
       await _logNotification(
         action: "Engineers Assigned",
-        details: "Assigned engineers '${event.engineers.join(", ")}' to site",
+        details: "You have been assigned to site '${event.siteName}'",
         siteId: event.sid,
+        recipients: engineersAssigned,
       );
 
       emit(CompleteUpdatingSiteState());
@@ -323,6 +329,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     required String action,
     required String details,
     required String siteId,
+    required List<String> recipients,
   }) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -335,7 +342,9 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "siteId": siteId,
         "userId": userId,
         "userName": userName,
+        "recipients": recipients,
         "timestamp": FieldValue.serverTimestamp(),
+        "isRead": false,
       });
     } catch (e) {
       print("Error logging notification: $e");
