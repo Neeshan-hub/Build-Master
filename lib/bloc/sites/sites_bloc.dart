@@ -92,6 +92,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "clientname": event.siteModel.clientname,
         "phone": event.siteModel.phone,
         "supervisor": event.siteModel.supervisor,
+        "supervisorId":  "",
         "imageUrls": imageUrls,
         "engineers": [], // Initialize engineers as an empty array
         "lastActivity": FieldValue.serverTimestamp(),
@@ -267,25 +268,36 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
   }) async {
     try {
       add(UpdatingSiteEvent());
-      DocumentReference sites =
+      DocumentReference siteRef =
       FirebaseFirestore.instance.collection("sites").doc(sid);
 
-      await sites.update({
+      // Fetch the current site data to check the existing supervisor ID
+      DocumentSnapshot siteSnapshot = await siteRef.get();
+      String? currentSupervisorId = siteSnapshot.exists
+          ? (siteSnapshot.data() as Map<String, dynamic>)['supervisorId']?.toString()
+          : null;
+
+      // Update the site data
+      await siteRef.update({
         "sitename": sitename,
         "sitelocation": sitelocation,
         "clientname": clientname,
         "phone": phone,
         "sitedesc": sitedesc,
         "supervisor": supervisor,
+        "supervisorId": supervisorId,
         "lastActivity": FieldValue.serverTimestamp(),
       });
 
-      await _logNotification(
-        action: "Site Updated",
-        details: "Updated site '$sitename' details",
-        siteId: sid,
-        recipients: supervisorId.isNotEmpty ? [supervisorId] : [],
-      );
+      // Only send notification if the supervisor ID has changed
+      if (supervisorId != currentSupervisorId && supervisorId.isNotEmpty) {
+        await _logNotification(
+          action: "Supervisor Assigned",
+          details: "Supervisor changed for site '$sitename'",
+          siteId: sid,
+          recipients: [supervisorId],
+        );
+      }
 
       add(CompleteUpdatingSiteEvent());
     } on FirebaseException catch (e) {
@@ -332,6 +344,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     required List<String> recipients,
   }) async {
     try {
+      print('sending notification');
       final user = FirebaseAuth.instance.currentUser;
       final userId = user?.uid ?? "unknown";
       final userName = user?.displayName ?? "unknown";
