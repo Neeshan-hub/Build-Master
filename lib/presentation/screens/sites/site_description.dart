@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/fluent_mdl2.dart';
 import 'package:iconify_flutter/icons/zondicons.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../bloc/sites/sites_bloc.dart';
@@ -33,6 +34,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
   String clientname = "";
   String phone = "";
   String about = "";
+  final ImagePicker _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
@@ -263,8 +265,10 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                             _SupervisorSelectionDialog(
                                               supervisors: supervisors,
                                               initialSelected: selectedSupervisor,
-                                              initialSelectedId: selectedSupervisorId,
-                                              onConfirm: (String? name, String? id) {
+                                              initialSelectedId:
+                                              selectedSupervisorId,
+                                              onConfirm: (String? name,
+                                                  String? id) {
                                                 selectedSupervisor = name;
                                                 selectedSupervisorId = id;
                                                 print(
@@ -319,8 +323,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                                 customLoading(size),
                                           );
                                         }
-                                        if (state
-                                        is CompleteUpdatingSiteState) {
+                                        if (state is CompleteUpdatingSiteState) {
                                           BotToast.closeAllLoading();
                                           Navigator.of(context).pop();
                                           BotToast.showText(
@@ -350,8 +353,7 @@ class _SiteDescriptionState extends State<SiteDescription> {
                                                 'Updating with Supervisor: $selectedSupervisor, ID: $selectedSupervisorId');
                                             if (_formKey.currentState!
                                                 .validate()) {
-                                              BlocProvider.of<SitesBloc>(
-                                                  context)
+                                              BlocProvider.of<SitesBloc>(context)
                                                   .updateSiteInfo(
                                                 sid: sid,
                                                 sitename: sitename,
@@ -392,6 +394,23 @@ class _SiteDescriptionState extends State<SiteDescription> {
       );
     }
 
+    Future<void> _pickAndUploadImage() async {
+      try {
+        final XFile? image =
+        await _picker.pickImage(source: ImageSource.gallery);
+        if (image != null) {
+          BlocProvider.of<SitesBloc>(context).add(
+            AddSiteImageEvent(sid: args['sid'], image: image),
+          );
+        }
+      } catch (e) {
+        BotToast.showText(
+          text: "Error picking image: $e",
+          contentColor: AppColors.red,
+        );
+      }
+    }
+
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: PreferredSize(
@@ -409,7 +428,8 @@ class _SiteDescriptionState extends State<SiteDescription> {
                 if (snapshot.hasData) {
                   final data = snapshot.data!.data() ?? {};
                   final currentSupervisor = data['supervisor']?.toString();
-                  final currentSupervisorId = data['supervisorId']?.toString();
+                  final currentSupervisorId =
+                  data['supervisorId']?.toString();
                   return IconButton(
                     onPressed: () {
                       showEditSiteModal(
@@ -453,524 +473,591 @@ class _SiteDescriptionState extends State<SiteDescription> {
           ),
         ).customAppBar(),
       ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection("sites")
-            .doc(args['sid'])
-            .collection("siteimages")
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding:
-                    EdgeInsets.symmetric(horizontal: padding.top * 0.8),
-                    child: snapshot.data!.docs.isEmpty
-                        ? Container()
-                        : CarouselSlider.builder(
-                      carouselController: carouselController,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index, _) {
-                        return snapshot.data!.docs[index]['image'] == null
-                            ? Container()
-                            : PageView(
-                          onPageChanged: (value) {
-                            setState(() {
-                              dotposition = value;
-                            });
-                          },
-                          children: [
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: padding.top * 0.2,
-                                  vertical: padding.top * 0.2),
-                              decoration: BoxDecoration(
-                                color: AppColors.blue,
-                                image: DecorationImage(
-                                  image: NetworkImage(snapshot
-                                      .data!.docs[index]['image']),
-                                  fit: BoxFit.fill,
+      body: BlocListener<SitesBloc, SitesState>(
+        listener: (context, state) {
+          if (state is AddingSiteImageState) {
+            BotToast.showCustomLoading(
+              toastBuilder: (context) => customLoading(size),
+            );
+          }
+          if (state is AddedSiteImageState) {
+            BotToast.closeAllLoading();
+            BotToast.showText(
+              text: "Image added successfully",
+              contentColor: AppColors.green,
+            );
+          }
+          if (state is FailedAddingSiteImageState) {
+            BotToast.closeAllLoading();
+            BotToast.showText(
+              text: state.error ?? "Failed to add image",
+              contentColor: AppColors.red,
+            );
+          }
+        },
+        child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection("sites")
+              .doc(args['sid'])
+              .collection("siteimages")
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding:
+                      EdgeInsets.symmetric(horizontal: padding.top * 0.8),
+                      child: snapshot.data!.docs.isEmpty
+                          ? Container()
+                          : CarouselSlider.builder(
+                        carouselController: carouselController,
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index, _) {
+                          return snapshot.data!.docs[index]['image'] == null
+                              ? Container()
+                              : PageView(
+                            onPageChanged: (value) {
+                              setState(() {
+                                dotposition = value;
+                              });
+                            },
+                            children: [
+                              Container(
+                                margin: EdgeInsets.symmetric(
+                                    horizontal: padding.top * 0.2,
+                                    vertical: padding.top * 0.2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.blue,
+                                  image: DecorationImage(
+                                    image: NetworkImage(snapshot
+                                        .data!.docs[index]['image']),
+                                    fit: BoxFit.fill,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        );
-                      },
-                      options: CarouselOptions(
-                        viewportFraction: 1.0,
-                        height: size.height / 90 * 15.5,
+                            ],
+                          );
+                        },
+                        options: CarouselOptions(
+                          viewportFraction: 1.0,
+                          height: size.height / 90 * 15.5,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: size.height / 90 * 1.3),
-                  snapshot.data!.docs.isEmpty
-                      ? Container()
-                      : Align(
-                    alignment: Alignment.center,
-                    child: CarouselIndicator(
-                      count: snapshot.data!.docs.length,
-                      activeColor: AppColors.yellow,
-                      color: AppColors.blue,
-                      index: dotposition,
+                    SizedBox(height: size.height / 90 * 1.3),
+                    snapshot.data!.docs.isEmpty
+                        ? Container()
+                        : Align(
+                      alignment: Alignment.center,
+                      child: CarouselIndicator(
+                        count: snapshot.data!.docs.length,
+                        activeColor: AppColors.yellow,
+                        color: AppColors.blue,
+                        index: dotposition,
+                      ),
                     ),
-                  ),
-                  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                    stream: FirebaseFirestore.instance
-                        .collection("sites")
-                        .doc(args['sid'])
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final data = snapshot.data!.data() ?? {};
-                        sid = data['sid']?.toString() ?? '';
-                        sitename = data['sitename']?.toString() ?? '';
-                        sitelocation = data['sitelocation']?.toString() ?? '';
-                        clientname = data['clientname']?.toString() ?? '';
-                        phone = data['phone']?.toString() ?? '';
-                        about = data['sitedesc']?.toString() ?? '';
-                        selectedEngineers = data.containsKey('engineers')
-                            ? (data['engineers'] as List<dynamic>)
-                            .map((e) => Map<String, String>.from(e))
-                            .toList()
-                            : [];
-                        final currentSupervisor = data['supervisor']?.toString();
-                        final currentSupervisorId = data['supervisorId']?.toString();
+                    StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                      stream: FirebaseFirestore.instance
+                          .collection("sites")
+                          .doc(args['sid'])
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final data = snapshot.data!.data() ?? {};
+                          sid = data['sid']?.toString() ?? '';
+                          sitename = data['sitename']?.toString() ?? '';
+                          sitelocation = data['sitelocation']?.toString() ?? '';
+                          clientname = data['clientname']?.toString() ?? '';
+                          phone = data['phone']?.toString() ?? '';
+                          about = data['sitedesc']?.toString() ?? '';
+                          selectedEngineers = data.containsKey('engineers')
+                              ? (data['engineers'] as List<dynamic>)
+                              .map((e) => Map<String, String>.from(e))
+                              .toList()
+                              : [];
+                          final currentSupervisor =
+                          data['supervisor']?.toString();
+                          final currentSupervisorId =
+                          data['supervisorId']?.toString();
 
-                        return Container(
-                          height: MediaQuery.of(context).size.height,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: padding.top * 0.8),
-                          child: ListView(
-                            shrinkWrap: true,
-                            children: [
-                              SizedBox(height: size.height / 90 * 1.2),
-                              Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  "${snapshot.data!['sitename']}",
-                                  style: TextStyle(
-                                    color: AppColors.blue,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: size.height / 90 * 1.0),
-                              Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    width: size.width / 2 * 1.4,
-                                    child: Text(
-                                      "${snapshot.data!['sitelocation']}",
-                                      overflow: TextOverflow.clip,
-                                      style: TextStyle(
-                                        color: AppColors.grey,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
-                                      ),
+                          return Container(
+                            height: MediaQuery.of(context).size.height,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: padding.top * 0.8),
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: [
+                                SizedBox(height: size.height / 90 * 1.2),
+                                Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    "${snapshot.data!['sitename']}",
+                                    style: TextStyle(
+                                      color: AppColors.blue,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 18,
                                     ),
                                   ),
-                                  Icon(
-                                    Icons.location_pin,
-                                    size: size.height / 90 * 2.66,
-                                    color: AppColors.grey,
-                                  )
-                                ],
-                              ),
-                              SizedBox(height: size.height / 90 * 0.5),
-                              Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  "${snapshot.data!['clientname']}",
-                                  style: TextStyle(
-                                    color: AppColors.grey,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                  ),
                                 ),
-                              ),
-                              SizedBox(height: size.height / 90 * 0.5),
-                              Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "+977${snapshot.data!['phone']}",
+                                SizedBox(height: size.height / 90 * 1.0),
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SizedBox(
+                                      width: size.width / 2 * 1.4,
+                                      child: Text(
+                                        "${snapshot.data!['sitelocation']}",
+                                        overflow: TextOverflow.clip,
+                                        style: TextStyle(
+                                          color: AppColors.grey,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.location_pin,
+                                      size: size.height / 90 * 2.66,
+                                      color: AppColors.grey,
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: size.height / 90 * 0.5),
+                                Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    "${snapshot.data!['clientname']}",
                                     style: TextStyle(
                                       color: AppColors.grey,
                                       fontWeight: FontWeight.w500,
                                       fontSize: 16,
                                     ),
                                   ),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      final Uri launchUri = Uri(
-                                        scheme: 'tel',
-                                        path: snapshot.data!['phone'],
-                                      );
-                                      if (await canLaunchUrl(launchUri)) {
-                                        await launchUrl(launchUri);
-                                      } else {
-                                        throw 'Could not launch $launchUri';
-                                      }
-                                    },
-                                    child: Icon(
-                                      Icons.phone,
-                                      size: size.height / 90 * 2.66,
-                                      color: AppColors.grey,
-                                    ),
-                                  )
-                                ],
-                              ),
-                              SizedBox(height: size.height / 90 * 1.5),
-                              Text(
-                                "About ${snapshot.data!['sitename']}",
-                                style: TextStyle(
-                                  color: AppColors.blue,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
                                 ),
-                              ),
-                              SizedBox(height: size.height / 90 * 0.5),
-                              SizedBox(
-                                height: size.height / 90 * 6.5,
-                                child: Text(
-                                  maxLines: 20,
-                                  softWrap: true,
-                                  overflow: TextOverflow.ellipsis,
-                                  textWidthBasis: TextWidthBasis.parent,
-                                  "${snapshot.data!['sitedesc']}",
+                                SizedBox(height: size.height / 90 * 0.5),
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "+977${snapshot.data!['phone']}",
+                                      style: TextStyle(
+                                        color: AppColors.grey,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        final Uri launchUri = Uri(
+                                          scheme: 'tel',
+                                          path: snapshot.data!['phone'],
+                                        );
+                                        if (await canLaunchUrl(launchUri)) {
+                                          await launchUrl(launchUri);
+                                        } else {
+                                          throw 'Could not launch $launchUri';
+                                        }
+                                      },
+                                      child: Icon(
+                                        Icons.phone,
+                                        size: size.height / 90 * 2.66,
+                                        color: AppColors.grey,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: size.height / 90 * 1.5),
+                                Text(
+                                  "About ${snapshot.data!['sitename']}",
                                   style: TextStyle(
-                                    color: AppColors.grey,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
+                                    color: AppColors.blue,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 18,
                                   ),
                                 ),
-                              ),
-                              Text(
-                                "Supervisor: ${currentSupervisor ?? "None"}",
-                                style: TextStyle(
-                                  color: AppColors.blue,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
+                                SizedBox(height: size.height / 90 * 0.5),
+                                SizedBox(
+                                  height: size.height / 90 * 6.5,
+                                  child: Text(
+                                    maxLines: 20,
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                    textWidthBasis: TextWidthBasis.parent,
+                                    "${snapshot.data!['sitedesc']}",
+                                    style: TextStyle(
+                                      color: AppColors.grey,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: size.height / 90 * 3),
-                              Text(
-                                "Assigned Engineers: ${selectedEngineers.isNotEmpty ? selectedEngineers.map((e) => e['name']).join(", ") : "None"}",
-                                style: TextStyle(
-                                  color: AppColors.blue,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 18,
+                                Text(
+                                  "Supervisor: ${currentSupervisor ?? "None"}",
+                                  style: TextStyle(
+                                    color: AppColors.blue,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 18,
+                                  ),
                                 ),
-                              ),
-                              if (args['role'] == "Supervisor")
-                                StreamBuilder<QuerySnapshot>(
-                                  stream: FirebaseFirestore.instance
-                                      .collection("users")
-                                      .where("role", isEqualTo: "Engineer")
-                                      .snapshots(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      final engineers = snapshot.data!.docs;
-                                      return Column(
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              color: AppColors.customWhite,
-                                              borderRadius:
-                                              BorderRadius.circular(10),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 5.0,
-                                                  vertical: 8),
-                                              child: InkWell(
-                                                onTap: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        _EngineerSelectionDialog(
-                                                          engineers: engineers,
-                                                          initialSelected:
-                                                          selectedEngineers,
-                                                          onConfirm: (List<
-                                                              Map<String,
-                                                                  String>>
-                                                          selected) {
-                                                            setState(() {
-                                                              selectedEngineers =
-                                                                  selected;
-                                                            });
-                                                            BlocProvider.of<
-                                                                SitesBloc>(
-                                                                context)
-                                                                .add(
-                                                              UpdateSiteEngineersEvent(
-                                                                sid: sid,
-                                                                siteName:
-                                                                args['sitename'],
-                                                                engineers:
-                                                                selectedEngineers,
-                                                              ),
-                                                            );
-                                                            print(
-                                                                'the selected engineers are');
-                                                            print(
-                                                                selectedEngineers);
-                                                          },
+                                SizedBox(height: size.height / 90 * 3),
+                                Text(
+                                  "Assigned Engineers: ${selectedEngineers.isNotEmpty ? selectedEngineers.map((e) => e['name']).join(", ") : "None"}",
+                                  style: TextStyle(
+                                    color: AppColors.blue,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                if (args['role'] == "Supervisor")
+                                  StreamBuilder<QuerySnapshot>(
+                                    stream: FirebaseFirestore.instance
+                                        .collection("users")
+                                        .where("role", isEqualTo: "Engineer")
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        final engineers = snapshot.data!.docs;
+                                        return Column(
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                color: AppColors.customWhite,
+                                                borderRadius:
+                                                BorderRadius.circular(10),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                const EdgeInsets.symmetric(
+                                                    horizontal: 5.0,
+                                                    vertical: 8),
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (context) =>
+                                                          _EngineerSelectionDialog(
+                                                            engineers: engineers,
+                                                            initialSelected:
+                                                            selectedEngineers,
+                                                            onConfirm: (List<
+                                                                Map<String,
+                                                                    String>>
+                                                            selected) {
+                                                              setState(() {
+                                                                selectedEngineers =
+                                                                    selected;
+                                                              });
+                                                              BlocProvider.of<
+                                                                  SitesBloc>(
+                                                                  context)
+                                                                  .add(
+                                                                UpdateSiteEngineersEvent(
+                                                                  sid: sid,
+                                                                  siteName: args[
+                                                                  'sitename'],
+                                                                  engineers:
+                                                                  selectedEngineers,
+                                                                ),
+                                                              );
+                                                              print(
+                                                                  'the selected engineers are');
+                                                              print(
+                                                                  selectedEngineers);
+                                                            },
+                                                          ),
+                                                    );
+                                                  },
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                    MainAxisSize.max,
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        "Add Engineers",
+                                                        style: TextStyle(
+                                                          color: AppColors.blue,
+                                                          fontWeight:
+                                                          FontWeight.w700,
+                                                          fontSize: 18,
                                                         ),
-                                                  );
-                                                },
-                                                child: Row(
-                                                  mainAxisSize:
-                                                  MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                                  children: [
-                                                    Text(
-                                                      "Add Engineers",
-                                                      style: TextStyle(
-                                                        color: AppColors.blue,
-                                                        fontWeight:
-                                                        FontWeight.w700,
-                                                        fontSize: 18,
                                                       ),
-                                                    ),
-                                                    Icon(
-                                                      Icons.add,
-                                                      size: 20,
-                                                      color: AppColors.blue,
-                                                    )
-                                                  ],
+                                                      Icon(
+                                                        Icons.add,
+                                                        size: 20,
+                                                        color: AppColors.blue,
+                                                      )
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      );
-                                    } else {
-                                      return const Center(
-                                        child: CircularProgressIndicator
-                                            .adaptive(),
-                                      );
-                                    }
-                                  },
-                                ),
-                              SizedBox(height: size.height / 90 * 2.8),
-                              SizedBox(
-                                height: size.height / 90 * 24.5,
-                                child: GridView(
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    mainAxisSpacing: padding.top * 0.4,
-                                    crossAxisSpacing: padding.top * 0.4,
-                                    childAspectRatio: 7 / 4,
-                                  ),
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.of(context)
-                                            .pushNamed(siteStocks, arguments: {
-                                          "sid": args['sid'],
-                                          "sitename": args['sitename'],
-                                          "sitedesc": args['sitedesc'],
-                                          "sitelocation": args['sitelocation'],
-                                          "clientname": args['clientname'],
-                                          "role": args['role'],
-                                          "phone": args['phone'],
-                                          "supervisor": args['supervisor']
-                                        });
-                                      },
-                                      child: CustomBox(
-                                        height: size.height / 90 * 6,
-                                        width: size.width / 9 * 1.3,
-                                        blurRadius: 4,
-                                        radius: 15,
-                                        shadowColor: AppColors.customWhite,
-                                        color: AppColors.white,
-                                        horizontalMargin: 0,
-                                        verticalMargin: 0,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                          children: [
-                                            Iconify(
-                                              FluentMdl2.storage_acount,
-                                              size: size.height / 90 * 4.2,
-                                              color: AppColors.red,
-                                            ),
-                                            Text(
-                                              "Manage Stocks",
-                                              style: TextStyle(
-                                                color: AppColors.red,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
-                                              ),
-                                            ),
                                           ],
-                                        ),
-                                      ).customBox(),
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          estimation,
-                                          arguments: {
-                                            'sid': args['sid'],
-                                            'title': 'Estimation',
-                                            'role': args['role'],
-                                          },
                                         );
-                                      },
-                                      child: CustomBox(
-                                        height: size.height / 90 * 5,
-                                        width: size.width / 8 * 1.3,
-                                        blurRadius: 4,
-                                        radius: 15,
-                                        shadowColor: AppColors.customWhite,
-                                        color: AppColors.white,
-                                        horizontalMargin: 0,
-                                        verticalMargin: 0,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                          children: [
-                                            Iconify(
-                                              Zondicons.currency_dollar,
-                                              size: size.height / 90 * 4.2,
-                                              color: AppColors.green,
-                                            ),
-                                            Text(
-                                              "Estimation",
-                                              style: TextStyle(
-                                                color: AppColors.green,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ).customBox(),
+                                      } else {
+                                        return const Center(
+                                          child:
+                                          CircularProgressIndicator.adaptive(),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                SizedBox(height: size.height / 90 * 2.8),
+                                SizedBox(
+                                  height: size.height / 90 * 24.5,
+                                  child: GridView(
+                                    physics:
+                                    const NeverScrollableScrollPhysics(),
+                                    gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      mainAxisSpacing: padding.top * 0.4,
+                                      crossAxisSpacing: padding.top * 0.4,
+                                      childAspectRatio: 7 / 4,
                                     ),
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.of(context).pushNamed(
-                                            workinprogress,
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.of(context)
+                                              .pushNamed(siteStocks, arguments: {
+                                            "sid": args['sid'],
+                                            "sitename": args['sitename'],
+                                            "sitedesc": args['sitedesc'],
+                                            "sitelocation":
+                                            args['sitelocation'],
+                                            "clientname": args['clientname'],
+                                            "role": args['role'],
+                                            "phone": args['phone'],
+                                            "supervisor": args['supervisor']
+                                          });
+                                        },
+                                        child: CustomBox(
+                                          height: size.height / 90 * 6,
+                                          width: size.width / 9 * 1.3,
+                                          blurRadius: 4,
+                                          radius: 15,
+                                          shadowColor: AppColors.customWhite,
+                                          color: AppColors.white,
+                                          horizontalMargin: 0,
+                                          verticalMargin: 0,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Iconify(
+                                                FluentMdl2.storage_acount,
+                                                size: size.height / 90 * 4.2,
+                                                color: AppColors.red,
+                                              ),
+                                              Text(
+                                                "Manage Stocks",
+                                                style: TextStyle(
+                                                  color: AppColors.red,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ).customBox(),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.pushNamed(
+                                            context,
+                                            estimation,
+                                            arguments: {
+                                              'sid': args['sid'],
+                                              'title': 'Estimation',
+                                              'role': args['role'],
+                                            },
+                                          );
+                                        },
+                                        child: CustomBox(
+                                          height: size.height / 90 * 5,
+                                          width: size.width / 8 * 1.3,
+                                          blurRadius: 4,
+                                          radius: 15,
+                                          shadowColor: AppColors.customWhite,
+                                          color: AppColors.white,
+                                          horizontalMargin: 0,
+                                          verticalMargin: 0,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Iconify(
+                                                Zondicons.currency_dollar,
+                                                size: size.height / 90 * 4.2,
+                                                color: AppColors.green,
+                                              ),
+                                              Text(
+                                                "Estimation",
+                                                style: TextStyle(
+                                                  color: AppColors.green,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ).customBox(),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).pushNamed(
+                                              workinprogress,
+                                              arguments: {
+                                                "sid": args['sid'],
+                                                "sitename": args['sitename'],
+                                                "role": args['role']
+                                              });
+                                        },
+                                        child: CustomBox(
+                                          height: size.height / 90 * 5,
+                                          width: size.width / 8 * 1.3,
+                                          blurRadius: 4,
+                                          radius: 15,
+                                          shadowColor: AppColors.customWhite,
+                                          color: AppColors.white,
+                                          horizontalMargin: 0,
+                                          verticalMargin: 0,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Iconify(
+                                                Zondicons.inbox_check,
+                                                color: AppColors.blue,
+                                                size: size.height / 90 * 4.2,
+                                              ),
+                                              Text(
+                                                "Work in Progress",
+                                                style: TextStyle(
+                                                  color: AppColors.blue,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ).customBox(),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).pushNamed(
+                                            orders,
                                             arguments: {
                                               "sid": args['sid'],
                                               "sitename": args['sitename'],
                                               "role": args['role']
-                                            });
-                                      },
-                                      child: CustomBox(
-                                        height: size.height / 90 * 5,
-                                        width: size.width / 8 * 1.3,
-                                        blurRadius: 4,
-                                        radius: 15,
-                                        shadowColor: AppColors.customWhite,
-                                        color: AppColors.white,
-                                        horizontalMargin: 0,
-                                        verticalMargin: 0,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                          children: [
-                                            Iconify(
-                                              Zondicons.inbox_check,
-                                              color: AppColors.blue,
-                                              size: size.height / 90 * 4.2,
-                                            ),
-                                            Text(
-                                              "Work in Progress",
-                                              style: TextStyle(
+                                            },
+                                          );
+                                        },
+                                        child: CustomBox(
+                                          height: size.height / 90 * 5,
+                                          width: size.width / 8 * 1.3,
+                                          blurRadius: 4,
+                                          radius: 15,
+                                          shadowColor: AppColors.customWhite,
+                                          color: AppColors.white,
+                                          horizontalMargin: 0,
+                                          verticalMargin: 0,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Iconify(
+                                                FluentMdl2.reservation_orders,
                                                 color: AppColors.blue,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
+                                                size: size.height / 90 * 4.2,
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ).customBox(),
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        Navigator.of(context).pushNamed(
-                                          orders,
-                                          arguments: {
-                                            "sid": args['sid'],
-                                            "sitename": args['sitename'],
-                                            "role": args['role']
-                                          },
-                                        );
-                                      },
-                                      child: CustomBox(
-                                        height: size.height / 90 * 5,
-                                        width: size.width / 8 * 1.3,
-                                        blurRadius: 4,
-                                        radius: 15,
-                                        shadowColor: AppColors.customWhite,
-                                        color: AppColors.white,
-                                        horizontalMargin: 0,
-                                        verticalMargin: 0,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                          children: [
-                                            Iconify(
-                                              FluentMdl2.reservation_orders,
-                                              color: AppColors.blue,
-                                              size: size.height / 90 * 4.2,
-                                            ),
-                                            Text(
-                                              "Manage Orders",
-                                              style: TextStyle(
-                                                color: AppColors.blue,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14,
+                                              Text(
+                                                "Manage Orders",
+                                                style: TextStyle(
+                                                  color: AppColors.blue,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14,
+                                                ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ).customBox(),
-                                    ),
-                                  ],
+                                            ],
+                                          ),
+                                        ).customBox(),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              buildImageList(snapshot),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return Center(
-                          child: Builder(
-                            builder: (context) => customLoading(size),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-            );
-          } else {
-            return Center(
-              child: Builder(
-                builder: (context) => customLoading(size),
-              ),
-            );
-          }
-        },
+                                if (args['role'] == "Admin" ||
+                                    args['role'] == "Supervisor")
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: padding.top * 0.4),
+                                    child: InkWell(
+                                      onTap: _pickAndUploadImage,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: AppColors.customWhite,
+                                          borderRadius:
+                                          BorderRadius.circular(10),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: padding.top * 0.4,
+                                            vertical: padding.top * 0.4),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.add,
+                                              color: AppColors.blue,
+                                              size: size.height / 90 * 2.3,
+                                            ),
+                                            SizedBox(
+                                                width: padding.top * 0.2),
+                                            Text(
+                                              "Add Site Image",
+                                              style: TextStyle(
+                                                color: AppColors.blue,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                buildImageList(snapshot),
+                                SizedBox(height: 200,),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return Center(
+                            child: Builder(
+                              builder: (context) => customLoading(size),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return Center(
+                child: Builder(
+                  builder: (context) => customLoading(size),
+                ),
+              );
+            }
+          },
+        ),
       ),
     );
   }

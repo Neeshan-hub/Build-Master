@@ -62,6 +62,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     );
     on<AddSiteEvent>(addSite);
     on<UpdateSiteEngineersEvent>(updateSiteEngineers);
+    on<AddSiteImageEvent>(addSiteImage);
   }
 
   CollectionReference sites = FirebaseFirestore.instance.collection("sites");
@@ -92,7 +93,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
         "clientname": event.siteModel.clientname,
         "phone": event.siteModel.phone,
         "supervisor": event.siteModel.supervisor,
-        "supervisorId":  "",
+        "supervisorId": "",
         "imageUrls": imageUrls,
         "engineers": [], // Initialize engineers as an empty array
         "lastActivity": FieldValue.serverTimestamp(),
@@ -111,6 +112,33 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
       add(FailedSiteEvent(error: e.message ?? "Failed to add site"));
     } catch (e) {
       add(FailedSiteEvent(error: e.toString()));
+    }
+  }
+
+  Future<void> addSiteImage(
+      AddSiteImageEvent event, Emitter<SitesState> emit) async {
+    emit(AddingSiteImageState());
+    try {
+      String? url = await _uploadSupaFile(event.image, event.sid);
+      if (url != null) {
+        await sites.doc(event.sid).update({
+          "imageUrls": FieldValue.arrayUnion([url]),
+          "lastActivity": FieldValue.serverTimestamp(),
+        });
+
+        await sites
+            .doc(event.sid)
+            .collection("siteimages")
+            .add({"image": url, "timestamp": FieldValue.serverTimestamp()});
+
+        emit(AddedSiteImageState());
+      } else {
+        emit(FailedAddingSiteImageState(error: "Failed to upload image"));
+      }
+    } on FirebaseException catch (e) {
+      emit(FailedAddingSiteImageState(error: e.message));
+    } catch (e) {
+      emit(FailedAddingSiteImageState(error: e.toString()));
     }
   }
 
@@ -274,7 +302,8 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
       // Fetch the current site data to check the existing supervisor ID
       DocumentSnapshot siteSnapshot = await siteRef.get();
       String? currentSupervisorId = siteSnapshot.exists
-          ? (siteSnapshot.data() as Map<String, dynamic>)['supervisorId']?.toString()
+          ? (siteSnapshot.data() as Map<String, dynamic>)['supervisorId']
+          ?.toString()
           : null;
 
       // Update the site data
@@ -341,7 +370,7 @@ class SitesBloc extends Bloc<SitesEvent, SitesState> {
     required String action,
     required String details,
     required String siteId,
-    required List<String> recipients,
+    List<String> recipients = const [],
   }) async {
     try {
       print('sending notification');

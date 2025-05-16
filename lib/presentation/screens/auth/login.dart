@@ -309,8 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
                               if (state is CompletedLoadingState) {
                                 BotToast.closeAllLoading();
-                                Navigator.of(context)
-                                    .pushReplacementNamed(dashboard);
+                                Navigator.of(context).pushReplacementNamed(dashboard);
                               }
                               if (state is UserNotFountState) {
                                 BotToast.closeAllLoading();
@@ -326,6 +325,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                   contentColor: AppColors.red,
                                 );
                               }
+                              if (state is LoginFailedState) {
+                                BotToast.closeAllLoading();
+                                BotToast.showText(
+                                  text: state.error, // Display the error message from LoginFailedState
+                                  contentColor: AppColors.red,
+                                );
+                              }
                             },
                             builder: (context, state) {
                               return SizedBox(
@@ -333,14 +339,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.blue,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     elevation: 4,
-                                    shadowColor:
-                                        AppColors.blue.withOpacity(0.4),
+                                    shadowColor: AppColors.blue.withOpacity(0.4),
                                   ),
                                   onPressed: () {
                                     if (_formkey.currentState!.validate()) {
@@ -348,14 +352,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                         email: usernameController.text,
                                         password: passwordController.text,
                                       );
-                                      BlocProvider.of<AuthBloc>(context)
-                                          .signInWithEmail(userModel);
+                                      BlocProvider.of<AuthBloc>(context).signInWithEmail(userModel);
                                     }
                                   },
                                   child: Text(
                                     "Log In",
-                                    style:
-                                        theme.textTheme.titleMedium?.copyWith(
+                                    style: theme.textTheme.titleMedium?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
                                       letterSpacing: 0.8,

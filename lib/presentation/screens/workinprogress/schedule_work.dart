@@ -95,14 +95,35 @@ class _ScheduleWorkState extends State<ScheduleWork> {
                         builder: (context, child) {
                           return Theme(
                             data: ThemeData.light().copyWith(
-                                colorScheme: ColorScheme.dark(
-                              primary: AppColors.white,
-                              onPrimary: Colors.black,
-                              surface: AppColors.white,
-                              onSurface: Colors.black,
-                            )),
+                              colorScheme: ColorScheme.light(
+                                primary: AppColors.yellow,
+                                onPrimary: Colors.black,
+
+                                onSurface: Colors.black,
+                              ),
+                              datePickerTheme: DatePickerThemeData(
+                                cancelButtonStyle: ButtonStyle(
+                                  foregroundColor: WidgetStateProperty.all(Colors.black), // Text/icon color
+                                  backgroundColor: WidgetStateProperty.all(Colors.transparent), // No background
+                                  overlayColor: WidgetStateProperty.all(AppColors.yellow.withOpacity(0.2)), // Ripple effect
+                                ),
+                                confirmButtonStyle: ButtonStyle(
+                                  foregroundColor: WidgetStateProperty.all(Colors.black), // Text/icon color
+                                  backgroundColor: WidgetStateProperty.all(Colors.transparent), // No background
+                                  overlayColor: WidgetStateProperty.all(AppColors.yellow.withOpacity(0.2)), // Ripple effect
+                                ),
+                              ),
+                              textButtonTheme: TextButtonThemeData(
+                                style: ButtonStyle(
+                                  foregroundColor: WidgetStateProperty.all(Colors.black), // Fallback for other buttons
+                                ),
+                              ),
+
+                            ),
+
                             child: child!,
                           );
+
                         },
                         context: context,
                         initialDate: DateTime.now(),
@@ -156,14 +177,35 @@ class _ScheduleWorkState extends State<ScheduleWork> {
                         builder: (context, child) {
                           return Theme(
                             data: ThemeData.light().copyWith(
-                                colorScheme: ColorScheme.dark(
-                              primary: AppColors.white,
-                              onPrimary: Colors.black,
-                              surface: AppColors.white,
-                              onSurface: Colors.black,
-                            )),
+                              colorScheme: ColorScheme.light(
+                                primary: AppColors.yellow,
+                                onPrimary: Colors.black,
+
+                                onSurface: Colors.black,
+                              ),
+                              datePickerTheme: DatePickerThemeData(
+                                cancelButtonStyle: ButtonStyle(
+                                  foregroundColor: WidgetStateProperty.all(Colors.black), // Text/icon color
+                                  backgroundColor: WidgetStateProperty.all(Colors.transparent), // No background
+                                  overlayColor: WidgetStateProperty.all(AppColors.yellow.withOpacity(0.2)), // Ripple effect
+                                ),
+                                confirmButtonStyle: ButtonStyle(
+                                  foregroundColor: WidgetStateProperty.all(Colors.black), // Text/icon color
+                                  backgroundColor: WidgetStateProperty.all(Colors.transparent), // No background
+                                  overlayColor: WidgetStateProperty.all(AppColors.yellow.withOpacity(0.2)), // Ripple effect
+                                ),
+                              ),
+                              textButtonTheme: TextButtonThemeData(
+                                style: ButtonStyle(
+                                  foregroundColor: WidgetStateProperty.all(Colors.black), // Fallback for other buttons
+                                ),
+                              ),
+
+                            ),
+
                             child: child!,
                           );
+
                         },
                         context: context,
                         initialDate: DateTime.now(),

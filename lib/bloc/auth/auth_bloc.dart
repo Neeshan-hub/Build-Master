@@ -85,12 +85,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   void signWIthPhone(PhoneAuthCredential phoneAuthCredential) async {
     CollectionReference users = FirebaseFirestore.instance.collection('users');
     QuerySnapshot querySnapshot =
-        await users.where('phone', isEqualTo: phonenumber).get();
+    await users.where('phone', isEqualTo: phonenumber).get();
 
     if (querySnapshot.docs.isEmpty) {
       try {
         UserCredential userCredential =
-            await auth.signInWithCredential(phoneAuthCredential);
+        await auth.signInWithCredential(phoneAuthCredential);
         if (userCredential.user != null) {
           add(NewUserCreatedEvent(firebaseUser: userCredential.user!));
         }
@@ -101,9 +101,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (querySnapshot.docs.isNotEmpty) {
       try {
         UserCredential userCredential =
-            await auth.signInWithCredential(phoneAuthCredential);
+        await auth.signInWithCredential(phoneAuthCredential);
         if (userCredential.user != null) {
-          add(LoggedInEvent(firebaseUser: userCredential.user!));
+          add(CompletedLoadingEvent());
         }
       } on FirebaseAuthException catch (e) {
         add(LoginFailedEvent(error: e.message!));
@@ -119,9 +119,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         password: usermodel.password!,
       );
       CollectionReference users =
-          FirebaseFirestore.instance.collection("users");
+      FirebaseFirestore.instance.collection("users");
       QuerySnapshot userQuery =
-          await users.where("fullname", isEqualTo: usermodel.fullname).get();
+      await users.where("fullname", isEqualTo: usermodel.fullname).get();
       if (userQuery.docs.isEmpty) {
         await users.doc(FirebaseAuth.instance.currentUser!.uid).set(
           {
@@ -143,36 +143,51 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         add(WeakPasswordEvent());
       } else if (e.code == 'email-already-in-use') {
         add(EmailAlreadyExistEvent());
+      } else {
+        add(EmailSignUpFailedEvent(error: e.message!));
       }
     } catch (e) {
-      add(
-        EmailSignUpFailedEvent(
-          error: e.toString(),
-        ),
-      );
+      add(EmailSignUpFailedEvent(error: e.toString()));
     }
   }
 
   signInWithEmail(UserModel userModel) async {
-    add(LoginLoadingEvent());
     try {
-      await FirebaseAuth.instance.signOut();
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: userModel.email!, password: userModel.password!);
+      add(LoginLoadingEvent());
+
+      // Check if user exists in Firestore first
       QuerySnapshot users = await FirebaseFirestore.instance
           .collection("users")
           .where("email", isEqualTo: userModel.email!)
           .get();
+
       if (users.docs.isEmpty) {
         add(UserNotFountEvent());
-      } else {
+        return;
+      }
+
+      // Attempt to sign in
+      UserCredential credential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+        email: userModel.email!,
+        password: userModel.password!,
+      );
+
+      if (credential.user != null) {
         add(CompletedLoadingEvent());
       }
     } on FirebaseAuthException catch (e) {
+      print('error');
+      print(e);
       if (e.code == 'user-not-found') {
         add(UserNotFountEvent());
       } else if (e.code == 'wrong-password') {
         add(InvalidPasswordEvent());
+      } else if (e.code == 'invalid-credential') {
+        print('in there3');
+        add(LoginFailedEvent(error: 'Invalid email or password'));
+      } else {
+        add(LoginFailedEvent(error: e.message ?? 'Authentication failed'));
       }
     } catch (e) {
       add(LoginFailedEvent(error: e.toString()));
@@ -181,7 +196,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   signout(BuildContext context) async {
     await FirebaseAuth.instance.signOut().then((value) =>
-        // ignore: use_build_context_synchronously
         Navigator.of(context).pushNamedAndRemoveUntil(login, (route) => false));
   }
 }
