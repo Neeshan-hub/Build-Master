@@ -507,58 +507,58 @@ class _SiteDescriptionState extends State<SiteDescription> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding:
-                      EdgeInsets.symmetric(horizontal: padding.top * 0.8),
-                      child: snapshot.data!.docs.isEmpty
-                          ? Container()
-                          : CarouselSlider.builder(
-                        carouselController: carouselController,
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (context, index, _) {
-                          return snapshot.data!.docs[index]['image'] == null
-                              ? Container()
-                              : PageView(
-                            onPageChanged: (value) {
-                              setState(() {
-                                dotposition = value;
-                              });
-                            },
-                            children: [
-                              Container(
-                                margin: EdgeInsets.symmetric(
-                                    horizontal: padding.top * 0.2,
-                                    vertical: padding.top * 0.2),
-                                decoration: BoxDecoration(
-                                  color: AppColors.blue,
-                                  image: DecorationImage(
-                                    image: NetworkImage(snapshot
-                                        .data!.docs[index]['image']),
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                        options: CarouselOptions(
-                          viewportFraction: 1.0,
-                          height: size.height / 90 * 15.5,
-                        ),
-                      ),
-                    ),
+                    // Container(
+                    //   padding:
+                    //   EdgeInsets.symmetric(horizontal: padding.top * 0.8),
+                    //   child: snapshot.data!.docs.isEmpty
+                    //       ? Container()
+                    //       : CarouselSlider.builder(
+                    //     carouselController: carouselController,
+                    //     itemCount: snapshot.data!.docs.length,
+                    //     itemBuilder: (context, index, _) {
+                    //       return snapshot.data!.docs[index]['image'] == null
+                    //           ? Container()
+                    //           : PageView(
+                    //         onPageChanged: (value) {
+                    //           setState(() {
+                    //             dotposition = value;
+                    //           });
+                    //         },
+                    //         children: [
+                    //           Container(
+                    //             margin: EdgeInsets.symmetric(
+                    //                 horizontal: padding.top * 0.2,
+                    //                 vertical: padding.top * 0.2),
+                    //             decoration: BoxDecoration(
+                    //               color: AppColors.blue,
+                    //               image: DecorationImage(
+                    //                 image: NetworkImage(snapshot
+                    //                     .data!.docs[index]['image']),
+                    //                 fit: BoxFit.fill,
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ],
+                    //       );
+                    //     },
+                    //     options: CarouselOptions(
+                    //       viewportFraction: 1.0,
+                    //       height: size.height / 90 * 15.5,
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(height: size.height / 90 * 1.3),
-                    snapshot.data!.docs.isEmpty
-                        ? Container()
-                        : Align(
-                      alignment: Alignment.center,
-                      child: CarouselIndicator(
-                        count: snapshot.data!.docs.length,
-                        activeColor: AppColors.yellow,
-                        color: AppColors.blue,
-                        index: dotposition,
-                      ),
-                    ),
+                    // snapshot.data!.docs.isEmpty
+                    //     ? Container()
+                    //     : Align(
+                    //   alignment: Alignment.center,
+                    //   child: CarouselIndicator(
+                    //     count: snapshot.data!.docs.length,
+                    //     activeColor: AppColors.yellow,
+                    //     color: AppColors.blue,
+                    //     index: dotposition,
+                    //   ),
+                    // ),
                     StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                       stream: FirebaseFirestore.instance
                           .collection("sites")

@@ -40,8 +40,8 @@ Future<void> main() async {
   // Initialize Supabase
   try {
     await Supabase.initialize(
-      url: 'https://lskkhschidhabbdcgndz.supabase.co',
-      anonKey: 'your_anon_key', // Replace with your actual key
+      url: 'https://szryfaofmlgwwannagpl.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6cnlmYW9mbWxnd3dhbm5hZ3BsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0ODEwMTQsImV4cCI6MjA2MTA1NzAxNH0.Mr2hzMjy0FRascaT7ZkQ-zXAvxn73wg4tJEpXK6YKg0', // Replace with your actual key
     );
     print("Supabase initialized successfully");
   } catch (e) {
